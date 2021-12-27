@@ -1,0 +1,106 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="Debugger.cpp">
+      <Filter>Debugger</Filter>
+    </ClCompile>
+    <ClCompile Include="GlobalOverides.cpp">
+      <Filter>Debugger</Filter>
+    </ClCompile>
+    <ClCompile Include="Chunk.cpp">
+      <Filter>Debugger</Filter>
+    </ClCompile>
+    <ClCompile Include="MemoryPool.cpp">
+      <Filter>Debugger</Filter>
+    </ClCompile>
+    <ClCompile Include="MemoryManager.cpp">
+      <Filter>Debugger</Filter>
+    </ClCompile>
+    <ClCompile Include="Timing.cpp">
+      <Filter>Debugger</Filter>
+    </ClCompile>
+    <ClCompile Include="sphere.cpp">
+      <Filter>Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderingEngine.cpp">
+      <Filter>Rendering Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="SceneManager.cpp">
+      <Filter>Scene Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="UI.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Debugger">
+      <UniqueIdentifier>{171ff870-e1a5-4d76-94f7-581a8013e107}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Defines">
+      <UniqueIdentifier>{8fac97c8-b523-461e-ba41-6593ebd89b37}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Objects">
+      <UniqueIdentifier>{1df6b368-0211-4899-85d7-8345ddec24a3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Rendering Engine">
+      <UniqueIdentifier>{2eba67f8-7faf-4ad6-89b5-3148bf0e926f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scene Manager">
+      <UniqueIdentifier>{d355b3d3-257b-4ad2-800d-7f84c3936dad}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scene Manager\Json">
+      <UniqueIdentifier>{32a615bb-febf-4b3a-945d-85be87172882}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UI">
+      <UniqueIdentifier>{b6b999e1-cced-4868-938b-963ce96dd214}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Debugger.h">
+      <Filter>Debugger</Filter>
+    </ClInclude>
+    <ClInclude Include="GlobalOverides.h">
+      <Filter>Debugger</Filter>
+    </ClInclude>
+    <ClInclude Include="Chunk.h">
+      <Filter>Debugger</Filter>
+    </ClInclude>
+    <ClInclude Include="MemoryPool.h">
+      <Filter>Debugger</Filter>
+    </ClInclude>
+    <ClInclude Include="Singleton.h">
+      <Filter>Debugger</Filter>
+    </ClInclude>
+    <ClInclude Include="MemoryManager.h">
+      <Filter>Debugger</Filter>
+    </ClInclude>
+    <ClInclude Include="Timing.h">
+      <Filter>Debugger</Filter>
+    </ClInclude>
+    <ClInclude Include="definitions.h">
+      <Filter>Defines</Filter>
+    </ClInclude>
+    <ClInclude Include="sphere.h">
+      <Filter>Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="VecTemplate.h">
+      <Filter>Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderingEngine.h">
+      <Filter>Rendering Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneManager.h">
+      <Filter>Scene Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="UI.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="MenuOption.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Json.hpp">
+      <Filter>Scene Manager\Json</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
