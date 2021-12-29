@@ -1,6 +1,26 @@
 #include "Timing.h"
 #include <iostream>
 
+
+
+void Timing::TimerStart()
+{
+	TimerStartTime = chrono::steady_clock::now();
+}
+
+void Timing::TimerEnd()
+{
+	TimerEndTime = chrono::steady_clock::now();
+}
+
+void Timing::TimeTaken()
+{
+	UI ui;
+	std::chrono::duration<double> diff = TimerEndTime - TimerStartTime;
+
+	std::cout << "Time Taken: " << diff.count();
+}
+
 Timing::Timing()
 {
 
@@ -9,21 +29,4 @@ Timing::Timing()
 Timing::~Timing()
 {
 
-}
-
-void Timing::StartTimer()
-{
-	m_startTime = chrono::steady_clock::now();
-}
-
-void Timing::EndTimer()
-{
-	m_endTime = chrono::steady_clock::now();
-}
-
-void Timing::PrintTimeTaken()
-{
-	std::chrono::duration<double> l_diff = m_endTime - m_startTime;
-	UI ui;
-	cout << "Time Taken: " << l_diff.count() << "\n";
 }

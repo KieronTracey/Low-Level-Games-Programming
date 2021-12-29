@@ -47,12 +47,12 @@ bool Sphere::intersect(const Vec3f& rayorig, const Vec3f& raydir, float& t0, flo
 
 void* Sphere::operator new(size_t size)
 {
-	return MemoryManagerRef::mp_memoryManager->mp_sceneMemoryPool->Alloc(size);
+	return MemoryManagerRef::memoryManager->sceneMemPool->Allocate(size);
 }
 
 void Sphere::operator delete(void* pMem)
 {
-	MemoryManagerRef::mp_memoryManager->mp_sceneMemoryPool->Free(pMem);
+	MemoryManagerRef::memoryManager->sceneMemPool->FreeMemory(pMem);
 }
 
 void Sphere::ObjectToJson(json* ap_json, int a_index)

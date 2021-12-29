@@ -1,14 +1,39 @@
 #ifndef _MEMORY_POOL_H_
 
-#include <iostream>
 #include "Chunk.h"
-
 using namespace std;
+#include <iostream>
+
+class MemoryPool
+{
+public:
+
+	int AmountOfMemoryUsed();
+
+	void* Allocate(size_t varSize);
+	void FreeMemory(void* freevar);
+
+	void operator delete(void* poolMemory);
+	void* operator new(size_t poolsize);
+
+	unsigned char* HmemPool;
+	size_t HsizeOfChunk;
+	
+	Chunk* FirstChunk;
+
+	int HusedBytes;
+	int Hallocatedmemory;
+	int HmaxMem;
+
+	MemoryPool(size_t PoolSizeBytes);
+	~MemoryPool();
+
+};
 
 struct MemoryHeader
 {
-	int mi_sizeOfVar;
-	int mi_errorCheck;
+	int MPerrorCheck;
+	int MPsizeOfVariable;	
 };
 
 struct MemoryFooter
@@ -16,27 +41,5 @@ struct MemoryFooter
 
 };
 
-class MemoryPool
-{
-public:
-	
-	MemoryPool(size_t ai_sizeOfPoolInBytes);
-	~MemoryPool();
 
-	
-	void* Alloc(size_t a_varSize);
-	void Free(void* p);
-	int AmountOfBytesUsed();
-
-	void* operator new(size_t size);
-	void operator delete(void* pMem);
-
-	unsigned char* mp_memPool;
-	size_t mi_sizeOfChunk;
-	int mi_usedBytes;
-	int mi_allocatedBytes;
-	int mi_maxBytes;
-	Chunk* mp_initalChunk;
-
-};
 #endif

@@ -1,47 +1,41 @@
 #ifndef _MEMORY_MANAGER_H_
 #define _MEMORY_MANAGER_H_
-
-#include <iostream>
 #include "MemoryPool.h"
 
-using namespace std;
-
-enum class PoolType
+enum class MemPoolType
 {
-	GENRAL_POOL = 0,
-	SCENE_POOL,
-	RENDER_POOL
+	GEN_POOL = 0,
+	SCENES_POOL = 1,
+	RENDERER_POOL = 2
 };
 
-class MemoryManager
+class MemManager
 {
 public:
-	//- Manager Methods -//
-	MemoryManager();
-	~MemoryManager();
 
-	//- User Accessed/Defined -//
+	static MemManager* memPoolSelf;
 
-	//- Developer Accessed/Defined -//
-	void* SaveVarToMemoryPool(size_t ai_size, PoolType a_type);
-	void DeleteVarToMemoryPool(void* ap_memory, PoolType a_type);
+	MemoryPool* genMemPool;
+	MemoryPool* sceneMemPool;
+	MemoryPool* rendererMemoryPool;
 
-	void* operator new(size_t size);
-	void operator delete(void* pMem);
+	void DeleteVariableInMemPool(void* MPmemory, MemPoolType MPtype);
+	void* SaveVariableToMemPool(size_t MPsize, MemPoolType MPtype);
+	
+	void operator delete(void* MPmem);
+	void* operator new(size_t MPsize);
 
-	MemoryPool* mp_genralMemoryPool;
-	MemoryPool* mp_sceneMemoryPool;
-	MemoryPool* mp_rendererMemoryPool;
+	MemManager();
+	~MemManager();
 
-	static MemoryManager* mp_self;
-
-	//- Templates -//
 };
 
 class MemoryManagerRef
 {
+
 public:
-	static MemoryManager* mp_memoryManager;
+	static MemManager* memoryManager;
+
 };
 
-#endif // !_MEMORY_MANAGER_H_
+#endif

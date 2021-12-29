@@ -5,20 +5,20 @@
 class Chunk
 {
 public:
-	size_t SizeOfUserMem;
-	bool Mfree;
+	
+	Chunk* FindOldChunk(size_t VarSize);
+	Chunk* FindNewChunk(size_t VarSize);
+	
+	void* ChangePointer(void* SaveLocation, size_t VarSize);
+
+	Chunk* LpreviousChunk;
+	Chunk* LNextChunk;
 
 	Chunk(Chunk* nextChunk, Chunk* previousChunk, size_t sizeMemoryToSave, bool available);
 	~Chunk();
 
-	Chunk* FindOldChunk(size_t VarSize);
-	Chunk* FindNewChunk(size_t VarSize);
-	
-	Chunk* LpreviousChunk;
-	Chunk* LNextChunk;
-
-	void* ChangePointer(void* SaveLocation, size_t VarSize);
-	
+	size_t SizeOfAvailableMemory;
+	bool Mfree;
 };
 
 #endif

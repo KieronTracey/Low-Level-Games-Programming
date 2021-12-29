@@ -46,7 +46,7 @@ void RenderingEngine::TestRender()
 	{
 		mp_sceneManager->RefreshScene();
 		Timing l_timer;
-		l_timer.StartTimer();
+		l_timer.TimerStart();
 
 		CalculateFramesToRender();
 
@@ -89,8 +89,8 @@ void RenderingEngine::TestRender()
 		frames.clear();
 		mp_calulatedFrameInformation.clear();
 
-		l_timer.EndTimer();
-		l_timer.PrintTimeTaken();
+		l_timer.TimerEnd();
+		l_timer.TimeTaken();
 	}
 	else
 	{
@@ -104,7 +104,7 @@ void RenderingEngine::HDRender()
 	{
 		mp_sceneManager->RefreshScene();
 		Timing l_timer;
-		l_timer.StartTimer();
+		l_timer.TimerStart();
 
 		CalculateFramesToRender();
 
@@ -147,8 +147,8 @@ void RenderingEngine::HDRender()
 		frames.clear();
 		mp_calulatedFrameInformation.clear();
 
-		l_timer.EndTimer();
-		l_timer.PrintTimeTaken();
+		l_timer.TimerEnd();
+		l_timer.TimeTaken();
 	}
 	else
 	{
@@ -244,7 +244,7 @@ void RenderingEngine::calculateData(int ai_iteration, int ai_width, int ai_heigh
 void RenderingEngine::render(const std::vector<Sphere*>& spheres, int iteration, unsigned width, unsigned height, vector<thread>& ap_threads, Vec3f* ap_image)
 {
 	Timing l_timer;
-	l_timer.StartTimer();
+	l_timer.TimerStart();
 
 	Vec3f* pixel = ap_image;
 	float invWidth = 1 / float(width), invHeight = 1 / float(height);
@@ -254,8 +254,8 @@ void RenderingEngine::render(const std::vector<Sphere*>& spheres, int iteration,
 	// Trace rays
 	ap_threads.push_back(std::thread(&RenderingEngine::calculateData, this, iteration, width, height, invWidth, invHeight, angle, fov, aspectratio, pixel, ap_image, spheres));
 
-	l_timer.EndTimer();
-	l_timer.PrintTimeTaken();
+	l_timer.TimerEnd();
+	l_timer.TimeTaken();
 }
 
 float RenderingEngine::mix(const float& a, const float& b, const float& mix)

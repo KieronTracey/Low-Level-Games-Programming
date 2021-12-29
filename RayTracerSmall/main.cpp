@@ -55,7 +55,7 @@ void RendererWrapper() { gp_renderingEngine->Menu(); };
 void AnimationSettingsWrapper() {/*gp_animator->SettingsMenu()*/ };
 //- End Of Wrappers-//
 
-MemoryManager* MemoryManagerRef::mp_memoryManager = new MemoryManager();
+MemManager* MemoryManagerRef::memoryManager = new MemManager();
 
 int main(int argc, char** argv)
 {

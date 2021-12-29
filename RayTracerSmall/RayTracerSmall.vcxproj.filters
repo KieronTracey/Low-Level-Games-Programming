@@ -2,23 +2,20 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Debugger.cpp">
-      <Filter>Debugger</Filter>
-    </ClCompile>
     <ClCompile Include="GlobalOverides.cpp">
-      <Filter>Debugger</Filter>
+      <Filter>Memory Management and Tracking</Filter>
     </ClCompile>
     <ClCompile Include="Chunk.cpp">
-      <Filter>Debugger</Filter>
+      <Filter>Memory Management and Tracking</Filter>
     </ClCompile>
     <ClCompile Include="MemoryPool.cpp">
-      <Filter>Debugger</Filter>
+      <Filter>Memory Management and Tracking</Filter>
     </ClCompile>
     <ClCompile Include="MemoryManager.cpp">
-      <Filter>Debugger</Filter>
+      <Filter>Memory Management and Tracking</Filter>
     </ClCompile>
     <ClCompile Include="Timing.cpp">
-      <Filter>Debugger</Filter>
+      <Filter>Memory Management and Tracking</Filter>
     </ClCompile>
     <ClCompile Include="sphere.cpp">
       <Filter>Objects</Filter>
@@ -34,9 +31,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Filter Include="Debugger">
-      <UniqueIdentifier>{171ff870-e1a5-4d76-94f7-581a8013e107}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Defines">
       <UniqueIdentifier>{8fac97c8-b523-461e-ba41-6593ebd89b37}</UniqueIdentifier>
     </Filter>
@@ -55,28 +49,25 @@
     <Filter Include="UI">
       <UniqueIdentifier>{b6b999e1-cced-4868-938b-963ce96dd214}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Memory Management and Tracking">
+      <UniqueIdentifier>{171ff870-e1a5-4d76-94f7-581a8013e107}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Debugger.h">
-      <Filter>Debugger</Filter>
-    </ClInclude>
     <ClInclude Include="GlobalOverides.h">
-      <Filter>Debugger</Filter>
+      <Filter>Memory Management and Tracking</Filter>
     </ClInclude>
     <ClInclude Include="Chunk.h">
-      <Filter>Debugger</Filter>
+      <Filter>Memory Management and Tracking</Filter>
     </ClInclude>
     <ClInclude Include="MemoryPool.h">
-      <Filter>Debugger</Filter>
-    </ClInclude>
-    <ClInclude Include="Singleton.h">
-      <Filter>Debugger</Filter>
+      <Filter>Memory Management and Tracking</Filter>
     </ClInclude>
     <ClInclude Include="MemoryManager.h">
-      <Filter>Debugger</Filter>
+      <Filter>Memory Management and Tracking</Filter>
     </ClInclude>
     <ClInclude Include="Timing.h">
-      <Filter>Debugger</Filter>
+      <Filter>Memory Management and Tracking</Filter>
     </ClInclude>
     <ClInclude Include="definitions.h">
       <Filter>Defines</Filter>

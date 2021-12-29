@@ -1,22 +1,10 @@
 #include "Chunk.h"
 
-Chunk::Chunk(Chunk* nextChunk, Chunk* previousChunk, size_t sizeMemoryToSave, bool available) : LNextChunk(nextChunk), LpreviousChunk(previousChunk), SizeOfUserMem(sizeMemoryToSave), Mfree(available)
-{
-	//  n/a
-}
 
-Chunk::~Chunk()
-{
-	LpreviousChunk = nullptr;
-	LNextChunk = nullptr;
-	
-	Mfree = NULL;
-	SizeOfUserMem = NULL;
-}
 
 Chunk* Chunk::FindOldChunk(size_t ai_sizeOfVar)
 {
-	if (ai_sizeOfVar == SizeOfUserMem && Mfree == true)
+	if (ai_sizeOfVar == SizeOfAvailableMemory && Mfree == true)
 	{
 		return LpreviousChunk;
 	}
@@ -32,13 +20,13 @@ Chunk* Chunk::FindOldChunk(size_t ai_sizeOfVar)
 
 Chunk* Chunk::FindNewChunk(size_t VarSize)
 {
-	if (VarSize == SizeOfUserMem && Mfree == true)
+	if (VarSize == SizeOfAvailableMemory && Mfree == true)
 	{
 		return this;
 	}
 	else if (LNextChunk == nullptr)
 	{
-		LNextChunk = (Chunk*)((char*)this + (sizeof(Chunk) + SizeOfUserMem));
+		LNextChunk = (Chunk*)((char*)this + (sizeof(Chunk) + SizeOfAvailableMemory));
 		LNextChunk->Mfree = false;
 		return LNextChunk;
 	}
@@ -53,10 +41,24 @@ Chunk* Chunk::FindNewChunk(size_t VarSize)
 // change pointer by chunk size
 void* Chunk::ChangePointer(void* SaveLocation, size_t VarSize)
 {
-	SizeOfUserMem = VarSize;
+	SizeOfAvailableMemory = VarSize;
 	Mfree = false;
 
 	return (((char*)SaveLocation) + sizeof(Chunk));
+}
+
+Chunk::Chunk(Chunk* nextChunk, Chunk* previousChunk, size_t sizeMemoryToSave, bool available) : LNextChunk(nextChunk), LpreviousChunk(previousChunk), SizeOfAvailableMemory(sizeMemoryToSave), Mfree(available)
+{
+	//  n/a
+}
+
+Chunk::~Chunk()
+{
+	LpreviousChunk = nullptr;
+	LNextChunk = nullptr;
+
+	Mfree = NULL;
+	SizeOfAvailableMemory = NULL;
 }
 
 

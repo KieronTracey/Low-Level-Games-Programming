@@ -143,7 +143,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Chunk.cpp" />
-    <ClCompile Include="Debugger.cpp" />
     <ClCompile Include="GlobalOverides.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MemoryManager.cpp" />
@@ -156,7 +155,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Chunk.h" />
-    <ClInclude Include="Debugger.h" />
     <ClInclude Include="definitions.h" />
     <ClInclude Include="GlobalOverides.h" />
     <ClInclude Include="Json.hpp" />
@@ -165,7 +163,6 @@
     <ClInclude Include="MenuOption.h" />
     <ClInclude Include="RenderingEngine.h" />
     <ClInclude Include="SceneManager.h" />
-    <ClInclude Include="Singleton.h" />
     <ClInclude Include="sphere.h" />
     <ClInclude Include="Timing.h" />
     <ClInclude Include="UI.h" />

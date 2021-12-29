@@ -1,109 +1,111 @@
-#include "MemoryPool.h"
 #include "VecTemplate.h"`
+#include "MemoryPool.h"
 
-MemoryPool::MemoryPool(size_t ai_sizeOfPoolInBytes) :
-	mp_memPool((unsigned char*)malloc(ai_sizeOfPoolInBytes)), mi_maxBytes(ai_sizeOfPoolInBytes), mi_usedBytes(0), mi_allocatedBytes(0),
-	mp_initalChunk((Chunk*)mp_memPool), mi_sizeOfChunk(sizeof(Chunk))
+int MemoryPool::AmountOfMemoryUsed()
 {
+	return Hallocatedmemory;
 }
 
-MemoryPool::~MemoryPool()
+void MemoryPool::FreeMemory(void* var)
 {
-	delete mp_memPool;
-	mi_sizeOfChunk = NULL;
-	mi_usedBytes = NULL;
-	mi_allocatedBytes = NULL;
-	mi_maxBytes = NULL;
-	mp_initalChunk = nullptr;
-}
-
-void* MemoryPool::Alloc(size_t ai_varSize)
-{
-	if (ai_varSize < mi_maxBytes - mi_usedBytes)
+	if (var != nullptr)
 	{
-		//- declare the var//
-		Chunk* lp_previousChunkLocation;
-		Chunk* lp_chunkSavePointer;
-
-		//- if first time around calcuate where to place first chunk -//
-		if (mi_allocatedBytes == 0)
+		Chunk* MPchunk = (Chunk*)((char*)var - HsizeOfChunk);
+		if (MPchunk->Mfree == false)
 		{
-			//- Set Pointer to the start of the pool and null previous -//
-			lp_chunkSavePointer = mp_initalChunk;
-			lp_chunkSavePointer->Mfree = false;
-			lp_previousChunkLocation = nullptr;
+			MPchunk->Mfree = true;
+			HusedBytes -= MPchunk->SizeOfAvailableMemory + HsizeOfChunk;
+		}
+	}
+}
+
+void* MemoryPool::operator new(size_t size)
+{
+	size_t neededMemory = size + sizeof(MemoryHeader) + sizeof(MemoryFooter);
+	char* MPmemory = (char*)malloc(neededMemory);
+	MemoryHeader* pHeader = (MemoryHeader*)MPmemory;
+
+	pHeader->MPsizeOfVariable = size;
+	pHeader->MPerrorCheck = 0xDEADC0DE;
+
+	void* MPfooterAdit = MPmemory + sizeof(MemoryHeader) + size;
+	MemoryFooter* MPfooter = (MemoryFooter*)MPfooterAdit;
+
+	void* MPStartMemoryChunk = MPmemory + sizeof(MemoryHeader);
+	return MPStartMemoryChunk;
+}
+
+void MemoryPool::operator delete(void* MPmemory)
+{
+	MemoryHeader* MPheader = (MemoryHeader*)((char*)MPmemory - sizeof(MemoryHeader));
+	if (MPheader->MPerrorCheck != 0xDEADC0DE)
+	{
+		std::cout << "ERROR: over memory limit \n";
+	}
+	else
+	{
+		MemoryFooter* MPfooter = (MemoryFooter*)((char*)MPmemory + MPheader->MPsizeOfVariable);
+		free(MPheader);
+	}
+}
+
+void* MemoryPool::Allocate(size_t variableSize)
+{
+	if (variableSize < HmaxMem - HusedBytes)
+	{
+		// firstly declare variable
+		Chunk* MPlocOfLastChunk;
+		Chunk* MPsaveChunkPointer;
+
+		// allocate chunk if none exist, else continue from old chunk
+		if (Hallocatedmemory == 0)
+		{
+			MPsaveChunkPointer = FirstChunk;
+			MPsaveChunkPointer->Mfree = false;
+			MPlocOfLastChunk = nullptr;
 		}
 		else
 		{
-			lp_previousChunkLocation = mp_initalChunk->FindOldChunk(ai_varSize);
-			lp_chunkSavePointer = mp_initalChunk->FindNewChunk(ai_varSize);
+			MPlocOfLastChunk = FirstChunk->FindOldChunk(variableSize);
+			MPsaveChunkPointer = FirstChunk->FindNewChunk(variableSize);
 		}
 
-		//- Set Up Memory Chunk To Store variable information -//
-		if (lp_chunkSavePointer->Mfree == false)
+		// setup chunk to store variables
+		if (MPsaveChunkPointer->Mfree == false)
 		{
-			Chunk l_chunk = Chunk(nullptr, lp_previousChunkLocation, ai_varSize, true);
-			memcpy(lp_chunkSavePointer, &l_chunk, mi_sizeOfChunk);
-			mi_allocatedBytes += mi_sizeOfChunk + ai_varSize;
+			Chunk MPchunk = Chunk(nullptr, MPlocOfLastChunk, variableSize, true);
+			memcpy(MPsaveChunkPointer, &MPchunk, HsizeOfChunk);
+			Hallocatedmemory += HsizeOfChunk + variableSize;
 		}
 
-		mi_usedBytes += mi_sizeOfChunk + ai_varSize;
+		HusedBytes += HsizeOfChunk + variableSize;
 
-		//- return the adress of the data calculated in Write Function -//
-		return lp_chunkSavePointer->ChangePointer(lp_chunkSavePointer, ai_varSize);
+		return MPsaveChunkPointer->ChangePointer(MPsaveChunkPointer, variableSize);
 	}
 
-	cout << "Not Enough Memory Required Space is: " << ai_varSize << " and only: " << mi_maxBytes - mi_allocatedBytes << " left\n";
+	std::cout << "OUT OF MEMORY!";
+	std::cout << "Need: " << variableSize << " to run and this machine only has: " << HmaxMem - Hallocatedmemory << " remaining";
+
 
 	return nullptr;
 }
 
 
-void MemoryPool::Free(void* p)
+
+MemoryPool::MemoryPool(size_t poolsize) : HmemPool((unsigned char*)malloc(poolsize)), HmaxMem(poolsize), HusedBytes(0), Hallocatedmemory(0), FirstChunk((Chunk*)HmemPool), HsizeOfChunk(sizeof(Chunk))
 {
-	if (p != nullptr)
-	{
-		Chunk* lp_chunk = (Chunk*)((char*)p - mi_sizeOfChunk);
-		if (lp_chunk->Mfree == false)
-		{
-			lp_chunk->Mfree = true;
-			mi_usedBytes -= lp_chunk->SizeOfUserMem + mi_sizeOfChunk;
-		}
-	}
+	// empty
 }
 
-int MemoryPool::AmountOfBytesUsed()
+//free memory
+MemoryPool::~MemoryPool()
 {
-	return mi_allocatedBytes;
-}
+	delete HmemPool;
 
-void* MemoryPool::operator new(size_t size)
-{
-	size_t nRequestedBytes = size + sizeof(MemoryHeader) + sizeof(MemoryFooter);
-	char* pMem = (char*)malloc(nRequestedBytes);
-	MemoryHeader* pHeader = (MemoryHeader*)pMem;
+	Hallocatedmemory = NULL;
+	HmaxMem = NULL;
+	HsizeOfChunk = NULL;
+	HusedBytes = NULL;
 
-	pHeader->mi_sizeOfVar = size;
-	pHeader->mi_errorCheck = 0xDEADC0DE;
-
-	void* pFooterAddr = pMem + sizeof(MemoryHeader) + size;
-	MemoryFooter* pFooter = (MemoryFooter*)pFooterAddr;
-
-	void* pStartMemBlock = pMem + sizeof(MemoryHeader);
-	return pStartMemBlock;
-}
-
-void MemoryPool::operator delete(void* pMem)
-{
-	MemoryHeader* pHeader = (MemoryHeader*)((char*)pMem - sizeof(MemoryHeader));
-	if (pHeader->mi_errorCheck != 0xDEADC0DE)
-	{
-		cout << "ERROR CHECK MEMORY OVER RUN \n";
-		cout << "MEMORY WILL NOT BE DELETED PLEASE FIX AND TRY AGAIN \n";
-	}
-	else
-	{
-		MemoryFooter* pFooter = (MemoryFooter*)((char*)pMem + pHeader->mi_sizeOfVar);
-		free(pHeader);
-	}
+	FirstChunk = nullptr;
 }

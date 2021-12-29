@@ -1,11 +1,11 @@
 #include "GlobalOverides.h"
 
-void* operator new(size_t size)
+void operator delete(void* memory)
 {
-	return MemoryManagerRef::mp_memoryManager->mp_genralMemoryPool->Alloc(size);
+	MemoryManagerRef::memoryManager->genMemPool->FreeMemory(memory);
 }
 
-void operator delete(void* pMem)
+void* operator new(size_t size)
 {
-	MemoryManagerRef::mp_memoryManager->mp_genralMemoryPool->Free(pMem);
+	return MemoryManagerRef::memoryManager->genMemPool->Allocate(size);
 }
