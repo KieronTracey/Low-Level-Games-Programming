@@ -11,7 +11,7 @@ C:\Users\Desktop\Desktop\LLGP\RayTracerFramework\Low-Level-Games-Programming\Ray
 C:\Users\Desktop\Desktop\LLGP\RayTracerFramework\Low-Level-Games-Programming\RayTracerSmall\MemoryPool.cpp(7,1): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
 C:\Users\Desktop\Desktop\LLGP\RayTracerFramework\Low-Level-Games-Programming\RayTracerSmall\MemoryPool.cpp(47,52): warning C4267: '+=': conversion from 'size_t' to 'int', possible loss of data
 C:\Users\Desktop\Desktop\LLGP\RayTracerFramework\Low-Level-Games-Programming\RayTracerSmall\MemoryPool.cpp(50,46): warning C4267: '+=': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\Desktop\Desktop\LLGP\RayTracerFramework\Low-Level-Games-Programming\RayTracerSmall\MemoryPool.cpp(70,61): warning C4267: '-=': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\Desktop\Desktop\LLGP\RayTracerFramework\Low-Level-Games-Programming\RayTracerSmall\MemoryPool.cpp(70,60): warning C4267: '-=': conversion from 'size_t' to 'int', possible loss of data
 C:\Users\Desktop\Desktop\LLGP\RayTracerFramework\Low-Level-Games-Programming\RayTracerSmall\MemoryPool.cpp(86,30): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
   RenderingEngine.cpp
 C:\Users\Desktop\Desktop\LLGP\RayTracerFramework\Low-Level-Games-Programming\RayTracerSmall\definitions.h(9,1): warning C4005: 'INFINITY': macro redefinition

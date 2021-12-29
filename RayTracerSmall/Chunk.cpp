@@ -1,58 +1,63 @@
 #include "Chunk.h"
 
-Chunk::Chunk(Chunk* ap_nextChunk, Chunk* ap_previousChunk, size_t ai_memToSaveSize, bool ab_free) :
-	mp_nextChunkLocation(ap_nextChunk), mp_previousChunk(ap_previousChunk), mi_userMemSize(ai_memToSaveSize), mb_free(ab_free)
+Chunk::Chunk(Chunk* nextChunk, Chunk* previousChunk, size_t sizeMemoryToSave, bool available) : LNextChunk(nextChunk), LpreviousChunk(previousChunk), SizeOfUserMem(sizeMemoryToSave), Mfree(available)
 {
+	//  n/a
 }
 
 Chunk::~Chunk()
 {
-	mp_nextChunkLocation = nullptr;
-	mp_previousChunk = nullptr;
-	mi_userMemSize = NULL;
-	mb_free = NULL;
+	LpreviousChunk = nullptr;
+	LNextChunk = nullptr;
+	
+	Mfree = NULL;
+	SizeOfUserMem = NULL;
 }
 
-void* Chunk::Write(void* ap_locationToSave, size_t sizeOfVar)
+Chunk* Chunk::FindOldChunk(size_t ai_sizeOfVar)
 {
-	//- Offset the pointer by the size of the chunk class -//
-	mi_userMemSize = sizeOfVar;
-	mb_free = false;
-	return (((char*)ap_locationToSave) + sizeof(Chunk));
-}
-
-Chunk* Chunk::GetNextAvalableChunkAdress(size_t ai_sizeOfVar)
-{
-	if (ai_sizeOfVar == mi_userMemSize && mb_free == true)
+	if (ai_sizeOfVar == SizeOfUserMem && Mfree == true)
+	{
+		return LpreviousChunk;
+	}
+	else if (LNextChunk == nullptr)
 	{
 		return this;
 	}
-	else if (mp_nextChunkLocation == nullptr)
+	else
 	{
-		mp_nextChunkLocation = (Chunk*)((char*)this + (sizeof(Chunk) + mi_userMemSize));
-		mp_nextChunkLocation->mb_free = false;
-		return mp_nextChunkLocation;
+		return LNextChunk->FindOldChunk(ai_sizeOfVar);
+	}
+}
+
+Chunk* Chunk::FindNewChunk(size_t VarSize)
+{
+	if (VarSize == SizeOfUserMem && Mfree == true)
+	{
+		return this;
+	}
+	else if (LNextChunk == nullptr)
+	{
+		LNextChunk = (Chunk*)((char*)this + (sizeof(Chunk) + SizeOfUserMem));
+		LNextChunk->Mfree = false;
+		return LNextChunk;
 	}
 	else
 	{
-		return mp_nextChunkLocation->GetNextAvalableChunkAdress(ai_sizeOfVar);
+		return LNextChunk->FindNewChunk(VarSize);
 	}
 
 	return nullptr;
 }
 
-Chunk* Chunk::GetPreviousChunkAdress(size_t ai_sizeOfVar)
+// change pointer by chunk size
+void* Chunk::ChangePointer(void* SaveLocation, size_t VarSize)
 {
-	if (ai_sizeOfVar == mi_userMemSize && mb_free == true)
-	{
-		return mp_previousChunk;
-	}
-	else if (mp_nextChunkLocation == nullptr)
-	{
-		return this;
-	}
-	else
-	{
-		return mp_nextChunkLocation->GetPreviousChunkAdress(ai_sizeOfVar);
-	}
+	SizeOfUserMem = VarSize;
+	Mfree = false;
+
+	return (((char*)SaveLocation) + sizeof(Chunk));
 }
+
+
+

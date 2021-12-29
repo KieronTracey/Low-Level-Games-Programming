@@ -5,18 +5,20 @@
 class Chunk
 {
 public:
-	
-	Chunk(Chunk* ap_nextChunk, Chunk* ap_previousChunk, size_t ai_memToSaveSize, bool ab_free);
+	size_t SizeOfUserMem;
+	bool Mfree;
+
+	Chunk(Chunk* nextChunk, Chunk* previousChunk, size_t sizeMemoryToSave, bool available);
 	~Chunk();
 
-	void* Write(void* ap_locationToSave, size_t sizeOfVar);
-	Chunk* GetNextAvalableChunkAdress(size_t ai_sizeOfVar);
-	Chunk* GetPreviousChunkAdress(size_t ai_sizeOfVar);
+	Chunk* FindOldChunk(size_t VarSize);
+	Chunk* FindNewChunk(size_t VarSize);
+	
+	Chunk* LpreviousChunk;
+	Chunk* LNextChunk;
 
-	Chunk* mp_nextChunkLocation;
-	Chunk* mp_previousChunk;
-	size_t mi_userMemSize;
-	bool mb_free;
+	void* ChangePointer(void* SaveLocation, size_t VarSize);
+	
 };
 
 #endif

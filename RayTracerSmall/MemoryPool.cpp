@@ -30,17 +30,17 @@ void* MemoryPool::Alloc(size_t ai_varSize)
 		{
 			//- Set Pointer to the start of the pool and null previous -//
 			lp_chunkSavePointer = mp_initalChunk;
-			lp_chunkSavePointer->mb_free = false;
+			lp_chunkSavePointer->Mfree = false;
 			lp_previousChunkLocation = nullptr;
 		}
 		else
 		{
-			lp_previousChunkLocation = mp_initalChunk->GetPreviousChunkAdress(ai_varSize);
-			lp_chunkSavePointer = mp_initalChunk->GetNextAvalableChunkAdress(ai_varSize);
+			lp_previousChunkLocation = mp_initalChunk->FindOldChunk(ai_varSize);
+			lp_chunkSavePointer = mp_initalChunk->FindNewChunk(ai_varSize);
 		}
 
 		//- Set Up Memory Chunk To Store variable information -//
-		if (lp_chunkSavePointer->mb_free == false)
+		if (lp_chunkSavePointer->Mfree == false)
 		{
 			Chunk l_chunk = Chunk(nullptr, lp_previousChunkLocation, ai_varSize, true);
 			memcpy(lp_chunkSavePointer, &l_chunk, mi_sizeOfChunk);
@@ -50,7 +50,7 @@ void* MemoryPool::Alloc(size_t ai_varSize)
 		mi_usedBytes += mi_sizeOfChunk + ai_varSize;
 
 		//- return the adress of the data calculated in Write Function -//
-		return lp_chunkSavePointer->Write(lp_chunkSavePointer, ai_varSize);
+		return lp_chunkSavePointer->ChangePointer(lp_chunkSavePointer, ai_varSize);
 	}
 
 	cout << "Not Enough Memory Required Space is: " << ai_varSize << " and only: " << mi_maxBytes - mi_allocatedBytes << " left\n";
@@ -64,10 +64,10 @@ void MemoryPool::Free(void* p)
 	if (p != nullptr)
 	{
 		Chunk* lp_chunk = (Chunk*)((char*)p - mi_sizeOfChunk);
-		if (lp_chunk->mb_free == false)
+		if (lp_chunk->Mfree == false)
 		{
-			lp_chunk->mb_free = true;
-			mi_usedBytes -= lp_chunk->mi_userMemSize + mi_sizeOfChunk;
+			lp_chunk->Mfree = true;
+			mi_usedBytes -= lp_chunk->SizeOfUserMem + mi_sizeOfChunk;
 		}
 	}
 }
