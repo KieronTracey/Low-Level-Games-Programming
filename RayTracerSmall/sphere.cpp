@@ -1,18 +1,19 @@
 #include "sphere.h"
-Sphere* gp_selfSphere;
+Sphere* OBJ_sSphere;
 
 
 Sphere::Sphere()
 {
-	ms_objectName = "BaseSphere";
-	m_center = Vec3f(0, 0, 0);
-	mf_radius = 1000;
-	m_surfaceColor = Vec3f(255, 1, 1);
-	m_emissionColor = Vec3f(1, 1, 1);
-	mf_transparency = 0;
-	mf_reflection = 10;
+	
+	OBJ_center = Vec3f(2.5, -1, -15);
+	OBJ_radius = 2;
+	OBJ_surfcolour = Vec3f(0.9,0.1,0.1);
+	OBJ_emisscolour = Vec3f(0.1,0.1,0.1);
+	OBJ_transparency = 0.5;
+	OBJ_reflection = 1;
+	OBJ_name = "SphereDefault";
 
-	gp_selfSphere = this;
+	OBJ_sSphere = this;
 }
 
 Sphere::~Sphere()
@@ -20,146 +21,175 @@ Sphere::~Sphere()
 
 }
 
-//- Intersect explanation -//
-// l = calculating length by center of sphere vs ray origin
-// tca = calculates the distance to sphere
-// if tca < 0 = ray will be going away from sphere so stop calculations
-// d2 = calculates distance to center of the sphere (Dot isnt dot is square) and the maths is pythagoras theorem
-// d2 checked against radius to see if inside of sphere
-// thc = distance from the center of raycast to the outside of it
-// t0 = distance from ray origin to entry of the sphere
-// t1 = distance from ray origin to exit of the sphere
-bool Sphere::intersect(const Vec3f& rayorig, const Vec3f& raydir, float& t0, float& t1)
+bool Sphere::intersecting(const Vec3f& rayOrigin, const Vec3f& rayDirection, float& temp1, float& temp2)
 {
-	float lf_radius2 = (mf_radius * mf_radius);
+	float Radius = (OBJ_radius * OBJ_radius);
 
-	Vec3f l = m_center - rayorig;
-	float tca = l.dot(raydir);
-	if (tca < 0) return false;
-	float d2 = l.dot(l) - tca * tca;
-	if (d2 > lf_radius2) return false;
-	float thc = sqrt(lf_radius2 - d2);
-	t0 = tca - thc;
-	t1 = tca + thc;
+	Vec3f temp3 = OBJ_center - rayOrigin; //calculat length by sphere centre compared to rays origin
+
+	float dts = temp3.mathVar(rayDirection); // work out distance to sphere
+
+	if (dts < 0) return false; //if dts < 0 means ray is going away from sphere so break
+
+	float dtCos = temp3.mathVar(temp3) - dts * dts; // calculate the distance to centre of sphere (mathVar = square)
+
+	if (dtCos > Radius) return false; // dtCos compared to radius to calculate if inside of sphere
+
+	float rcTC = sqrt(Radius - dtCos); // rcTC = space from centre of raycast to it's outside
+
+	temp1 = dts - rcTC; // temp1 = space ammount from ray origin to sphere entry
+
+	temp2 = dts + rcTC; // temp2 = space ammount from ray origin to sphere exit
 
 	return true;
 }
 
+//allocate for new sphere
 void* Sphere::operator new(size_t size)
 {
 	return MemoryManagerRef::memoryManager->sceneMemPool->Allocate(size);
 }
 
-void Sphere::operator delete(void* pMem)
+//delete sphere
+void Sphere::operator delete(void* mem)
 {
-	MemoryManagerRef::memoryManager->sceneMemPool->FreeMemory(pMem);
+	MemoryManagerRef::memoryManager->sceneMemPool->FreeMemory(mem);
 }
 
-void Sphere::ObjectToJson(json* ap_json, int a_index)
+void Sphere::ConvertOBJtoJSON(json* jsonDt, int jIndex) //comment clearly later too messy
 {
-	(*ap_json)["Spheres"][a_index]["Name"] = ms_objectName;
-
-	(*ap_json)["Spheres"][a_index]["center"]["X"] = m_center.x;
-	(*ap_json)["Spheres"][a_index]["center"]["Y"] = m_center.y;
-	(*ap_json)["Spheres"][a_index]["center"]["Z"] = m_center.z;
-
-	(*ap_json)["Spheres"][a_index]["radius"] = mf_radius;
-
-	(*ap_json)["Spheres"][a_index]["surfaceColor"]["X"] = m_surfaceColor.x;
-	(*ap_json)["Spheres"][a_index]["surfaceColor"]["Y"] = m_surfaceColor.y;
-	(*ap_json)["Spheres"][a_index]["surfaceColor"]["Z"] = m_surfaceColor.z;
-
-	(*ap_json)["Spheres"][a_index]["emissionColor"]["X"] = m_emissionColor.x;
-	(*ap_json)["Spheres"][a_index]["emissionColor"]["Y"] = m_emissionColor.y;
-	(*ap_json)["Spheres"][a_index]["emissionColor"]["Z"] = m_emissionColor.z;
-
-	(*ap_json)["Spheres"][a_index]["transparency"] = mf_transparency;
-
-	(*ap_json)["Spheres"][a_index]["reflection"] = mf_reflection;
-
-	(*ap_json)["Spheres"][a_index]["startPosition"]["X"] = m_startPosition.x;
-	(*ap_json)["Spheres"][a_index]["startPosition"]["Y"] = m_startPosition.y;
-	(*ap_json)["Spheres"][a_index]["startPosition"]["Z"] = m_startPosition.z;
-
-	(*ap_json)["Spheres"][a_index]["endPosition"]["X"] = m_endPosition.x;
-	(*ap_json)["Spheres"][a_index]["endPosition"]["Y"] = m_endPosition.y;
-	(*ap_json)["Spheres"][a_index]["endPosition"]["Z"] = m_endPosition.z;
+	(*jsonDt)["Spheres"][jIndex]["Name"] = OBJ_name;
+	(*jsonDt)["Spheres"][jIndex]["center"]["X"] = OBJ_center.x;
+	(*jsonDt)["Spheres"][jIndex]["center"]["Y"] = OBJ_center.y;
+	(*jsonDt)["Spheres"][jIndex]["center"]["Z"] = OBJ_center.z;
+	(*jsonDt)["Spheres"][jIndex]["radius"] = OBJ_radius;
+	(*jsonDt)["Spheres"][jIndex]["surfaceColor"]["X"] = OBJ_surfcolour.x;
+	(*jsonDt)["Spheres"][jIndex]["surfaceColor"]["Y"] = OBJ_surfcolour.y;
+	(*jsonDt)["Spheres"][jIndex]["surfaceColor"]["Z"] = OBJ_surfcolour.z;
+	(*jsonDt)["Spheres"][jIndex]["emissionColor"]["X"] = OBJ_emisscolour.x;
+	(*jsonDt)["Spheres"][jIndex]["emissionColor"]["Y"] = OBJ_emisscolour.y;
+	(*jsonDt)["Spheres"][jIndex]["emissionColor"]["Z"] = OBJ_emisscolour.z;
+	(*jsonDt)["Spheres"][jIndex]["transparency"] = OBJ_transparency;
+	(*jsonDt)["Spheres"][jIndex]["reflection"] = OBJ_reflection;
+	(*jsonDt)["Spheres"][jIndex]["startPosition"]["X"] = OBJ_startpos.x;
+	(*jsonDt)["Spheres"][jIndex]["startPosition"]["Y"] = OBJ_startpos.y;
+	(*jsonDt)["Spheres"][jIndex]["startPosition"]["Z"] = OBJ_startpos.z;
+	(*jsonDt)["Spheres"][jIndex]["endPosition"]["X"] = OBJ_endpos.x;
+	(*jsonDt)["Spheres"][jIndex]["endPosition"]["Y"] = OBJ_endpos.y;
+	(*jsonDt)["Spheres"][jIndex]["endPosition"]["Z"] = OBJ_endpos.z;
 
 }
 
-void Sphere::JsonToObject(json* ap_json, int a_index)
+void Sphere::ConvertJSONtoOBJ(json* jsonDt, int jIndex) //comment clearly later too messy
 {
-	ms_objectName = (*ap_json)["Spheres"][a_index]["Name"];
-
-	m_center.x = (*ap_json)["Spheres"][a_index]["center"]["X"];
-	m_center.y = (*ap_json)["Spheres"][a_index]["center"]["Y"];
-	m_center.z = (*ap_json)["Spheres"][a_index]["center"]["Z"];
-
-	mf_radius = (*ap_json)["Spheres"][a_index]["radius"];
-
-	m_surfaceColor.x = (*ap_json)["Spheres"][a_index]["surfaceColor"]["X"];
-	m_surfaceColor.y = (*ap_json)["Spheres"][a_index]["surfaceColor"]["Y"];
-	m_surfaceColor.z = (*ap_json)["Spheres"][a_index]["surfaceColor"]["Z"];
-
-	m_emissionColor.x = (*ap_json)["Spheres"][a_index]["emissionColor"]["X"];
-	m_emissionColor.y = (*ap_json)["Spheres"][a_index]["emissionColor"]["Y"];
-	m_emissionColor.z = (*ap_json)["Spheres"][a_index]["emissionColor"]["Z"];
-
-	mf_transparency = (*ap_json)["Spheres"][a_index]["transparency"];
-
-	mf_reflection = (*ap_json)["Spheres"][a_index]["reflection"];
-
-	m_startPosition.x = (*ap_json)["Spheres"][a_index]["startPosition"]["X"];
-	m_startPosition.y = (*ap_json)["Spheres"][a_index]["startPosition"]["Y"];
-	m_startPosition.z = (*ap_json)["Spheres"][a_index]["startPosition"]["Z"];
-
-	m_endPosition.x = (*ap_json)["Spheres"][a_index]["endPosition"]["X"];
-	m_endPosition.y = (*ap_json)["Spheres"][a_index]["endPosition"]["Y"];
-	m_endPosition.z = (*ap_json)["Spheres"][a_index]["endPosition"]["Z"];
+	OBJ_name = (*jsonDt)["Spheres"][jIndex]["Name"];
+	OBJ_center.x = (*jsonDt)["Spheres"][jIndex]["center"]["X"];
+	OBJ_center.y = (*jsonDt)["Spheres"][jIndex]["center"]["Y"];
+	OBJ_center.z = (*jsonDt)["Spheres"][jIndex]["center"]["Z"];
+	OBJ_radius = (*jsonDt)["Spheres"][jIndex]["radius"];
+	OBJ_surfcolour.x = (*jsonDt)["Spheres"][jIndex]["surfaceColor"]["X"];
+	OBJ_surfcolour.y = (*jsonDt)["Spheres"][jIndex]["surfaceColor"]["Y"];
+	OBJ_surfcolour.z = (*jsonDt)["Spheres"][jIndex]["surfaceColor"]["Z"];
+	OBJ_emisscolour.x = (*jsonDt)["Spheres"][jIndex]["emissionColor"]["X"];
+	OBJ_emisscolour.y = (*jsonDt)["Spheres"][jIndex]["emissionColor"]["Y"];
+	OBJ_emisscolour.z = (*jsonDt)["Spheres"][jIndex]["emissionColor"]["Z"];
+	OBJ_transparency = (*jsonDt)["Spheres"][jIndex]["transparency"];
+	OBJ_reflection = (*jsonDt)["Spheres"][jIndex]["reflection"];
+	OBJ_startpos.x = (*jsonDt)["Spheres"][jIndex]["startPosition"]["X"];
+	OBJ_startpos.y = (*jsonDt)["Spheres"][jIndex]["startPosition"]["Y"];
+	OBJ_startpos.z = (*jsonDt)["Spheres"][jIndex]["startPosition"]["Z"];
+	OBJ_endpos.x = (*jsonDt)["Spheres"][jIndex]["endPosition"]["X"];
+	OBJ_endpos.y = (*jsonDt)["Spheres"][jIndex]["endPosition"]["Y"];
+	OBJ_endpos.z = (*jsonDt)["Spheres"][jIndex]["endPosition"]["Z"];
 }
 
-void Sphere::DisplayCurrentProperties()
+void Sphere::outputCurrentValues() //comment clearly later too messy
 {
-	mp_ui->PrintHeader("Current Values For " + ms_objectName);
-	mp_ui->PrintDataWithText("Object Name: ", ms_objectName);
-	mp_ui->PrintDataWithText("Position/Center: ", m_center);
-	mp_ui->PrintDataWithText("Radius: ", mf_radius);
-	mp_ui->PrintDataWithText("SurfaceColor: ", m_surfaceColor);
-	mp_ui->PrintDataWithText("EmmisionColor: ", m_emissionColor);
-	mp_ui->PrintDataWithText("Transparancy: ", mf_transparency);
-	mp_ui->PrintDataWithText("Reflection: ", mf_reflection);
+	spUI->PrintHeader("Current Object Values For " + OBJ_name);
+	spUI->PrintDataWithText("Object's Name: ", OBJ_name);
+	spUI->PrintDataWithText("Position / Center of Object: ", OBJ_center);
+	spUI->PrintDataWithText("Radius of Object: ", OBJ_radius);
+	spUI->PrintDataWithText("Object's Surface Color: ", OBJ_surfcolour);
+	spUI->PrintDataWithText("Object's Emmision Color: ", OBJ_emisscolour);
+	spUI->PrintDataWithText("Object's Transparancy: ", OBJ_transparency);
+	spUI->PrintDataWithText("Object's Reflection: ", OBJ_reflection);
 }
 
-//-------------------------------------------------//
-//------------ void Wrappers for void* ------------//
-//-------------------------------------------------//
-void DisplayCurrentValues() { gp_selfSphere->DisplayCurrentProperties(); }
-void ChangeName() { gp_selfSphere->ChangeVar<string>(gp_selfSphere->mp_ui->GetUserInput<string>("Enter Name(no spaces): "), &gp_selfSphere->ms_objectName); };
-void ChangePosition() { gp_selfSphere->ChangeVar<Vec3f>(gp_selfSphere->mp_ui->GetUserInputVec3f("Enter Position: "), &gp_selfSphere->m_center); };
-void ChangeRadius() { gp_selfSphere->ChangeVar<float>(gp_selfSphere->mp_ui->GetUserInput<float>("Enter Raidus: "), &gp_selfSphere->mf_radius); };
-void ChangeSurfaceColor() { gp_selfSphere->ChangeVar<Vec3f>(gp_selfSphere->mp_ui->GetUserInputVec3f("Enter SurfaceColor: "), &gp_selfSphere->m_surfaceColor); };
-void ChangeEmissionColor() { gp_selfSphere->ChangeVar<Vec3f>(gp_selfSphere->mp_ui->GetUserInputVec3f("Enter EmissionColor: "), &gp_selfSphere->m_emissionColor); };
-void ChangeTransparacy() { gp_selfSphere->ChangeVar<float>(gp_selfSphere->mp_ui->GetUserInput<float>("Enter Transparancy: "), &gp_selfSphere->mf_transparency); };
-void ChangeReflection() { gp_selfSphere->ChangeVar<float>(gp_selfSphere->mp_ui->GetUserInput<float>("Enter Reflection: "), &gp_selfSphere->mf_reflection); };
-void ChangeStartPos() { gp_selfSphere->ChangeVar<Vec3f>(gp_selfSphere->mp_ui->GetUserInputVec3f("Enter New Start Position: "), &gp_selfSphere->m_startPosition); };
-void ChangeEndPos() { gp_selfSphere->ChangeVar<Vec3f>(gp_selfSphere->mp_ui->GetUserInputVec3f("Enter End Position: "), &gp_selfSphere->m_endPosition); };
-
-void Sphere::UIAlterValues()
+void AlterName() 
 {
-	gp_selfSphere = this;
+	OBJ_sSphere->ChangeVar<string>(OBJ_sSphere->spUI->GetUserInput<string>("Please Input Name: "), &OBJ_sSphere->OBJ_name);
+};
 
-	vector<MenuOption> l_mainMenu;
-	l_mainMenu.push_back(MenuOption("Display Current Values", DisplayCurrentValues));
-	l_mainMenu.push_back(MenuOption("Change Name", ChangeName));
-	l_mainMenu.push_back(MenuOption("Change Position", ChangePosition));
-	l_mainMenu.push_back(MenuOption("Change Radius", ChangeRadius));
-	l_mainMenu.push_back(MenuOption("Change Surface Color", ChangeSurfaceColor));
-	l_mainMenu.push_back(MenuOption("Change Emission Color", ChangeEmissionColor));
-	l_mainMenu.push_back(MenuOption("Change Transparacy", ChangeTransparacy));
-	l_mainMenu.push_back(MenuOption("Change Reflection", ChangeReflection));
-	l_mainMenu.push_back(MenuOption("Edit Start Position", ChangeStartPos));
-	l_mainMenu.push_back(MenuOption("Edit End Position", ChangeEndPos));
+void AlterTransparancey() 
+{
+	OBJ_sSphere->ChangeVar<float>(OBJ_sSphere->spUI->GetUserInput<float>("Please Input Transparancy: "), &OBJ_sSphere->OBJ_transparency); 
+};
 
-	mp_ui->DisplayMenu(l_mainMenu, "Alter Spheres Values");
+void AlterReflection() 
+{
+	OBJ_sSphere->ChangeVar<float>(OBJ_sSphere->spUI->GetUserInput<float>("Please Input Reflection: "), &OBJ_sSphere->OBJ_reflection); 
+};
+
+void AlterPosition() 
+{
+	OBJ_sSphere->ChangeVar<Vec3f>(OBJ_sSphere->spUI->GetUserInputVec3f("Please Input Position: "), &OBJ_sSphere->OBJ_center); 
+};
+
+void AlterRadius() 
+{
+	OBJ_sSphere->ChangeVar<float>(OBJ_sSphere->spUI->GetUserInput<float>("Please Input Raidus: "), &OBJ_sSphere->OBJ_radius); 
+};
+
+void AlterSurfaceColor() 
+{
+	OBJ_sSphere->ChangeVar<Vec3f>(OBJ_sSphere->spUI->GetUserInputVec3f("Please Input SurfaceColor: "), &OBJ_sSphere->OBJ_surfcolour); 
+};
+
+void AlterEmissionColor() 
+{
+	OBJ_sSphere->ChangeVar<Vec3f>(OBJ_sSphere->spUI->GetUserInputVec3f("Please Input EmissionColor: "), &OBJ_sSphere->OBJ_emisscolour); 
+};
+
+void AlterStartPosition() 
+{
+	OBJ_sSphere->ChangeVar<Vec3f>(OBJ_sSphere->spUI->GetUserInputVec3f("Please Input Start Position: "), &OBJ_sSphere->OBJ_startpos); 
+};
+
+void AlterEndPosition() 
+{
+	OBJ_sSphere->ChangeVar<Vec3f>(OBJ_sSphere->spUI->GetUserInputVec3f("Please Input End Position: "), &OBJ_sSphere->OBJ_endpos);
+};
+
+void DisplayCurrentValues() 
+{
+	OBJ_sSphere->outputCurrentValues(); 
+}
+
+void Sphere::UIchange()
+{
+	OBJ_sSphere = this;
+
+	vector<MenuOption> InititalMenu;
+	InititalMenu.push_back(MenuOption("Display Current Values", DisplayCurrentValues));
+
+	InititalMenu.push_back(MenuOption("Alter Name", AlterName));
+
+	InititalMenu.push_back(MenuOption("Alter Transparacy", AlterTransparancey));
+
+	InititalMenu.push_back(MenuOption("Alter Reflection", AlterReflection));
+
+	InititalMenu.push_back(MenuOption("Alter Position", AlterPosition));
+
+	InititalMenu.push_back(MenuOption("Alter Radius", AlterRadius));
+
+	InititalMenu.push_back(MenuOption("Alter Surface Color", AlterSurfaceColor));
+
+	InititalMenu.push_back(MenuOption("Alter Emission Color", AlterEmissionColor));
+
+	InititalMenu.push_back(MenuOption("Alter Start Position", AlterStartPosition));
+
+	InititalMenu.push_back(MenuOption("Alter End Position", AlterEndPosition));
+
+	spUI->DisplayMenu(InititalMenu, "Alter Spheres Values");
 
 }

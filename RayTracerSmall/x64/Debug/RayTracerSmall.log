@@ -1,12 +1,18 @@
-﻿  MemoryManager.cpp
-C:\Users\Desktop\Desktop\LLGP\RayTracerFramework\Low-Level-Games-Programming\RayTracerSmall\MemoryManager.cpp(24,35): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
-  MemoryPool.cpp
-C:\Users\Desktop\Desktop\LLGP\RayTracerFramework\Low-Level-Games-Programming\RayTracerSmall\MemoryPool.cpp(1,10): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-C:\Users\Desktop\Desktop\LLGP\RayTracerFramework\Low-Level-Games-Programming\RayTracerSmall\MemoryPool.cpp(17,63): warning C4267: '-=': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\Desktop\Desktop\LLGP\RayTracerFramework\Low-Level-Games-Programming\RayTracerSmall\MemoryPool.cpp(28,34): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\Desktop\Desktop\LLGP\RayTracerFramework\Low-Level-Games-Programming\RayTracerSmall\MemoryPool.cpp(78,51): warning C4267: '+=': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\Desktop\Desktop\LLGP\RayTracerFramework\Low-Level-Games-Programming\RayTracerSmall\MemoryPool.cpp(81,44): warning C4267: '+=': conversion from 'size_t' to 'int', possible loss of data
-C:\Users\Desktop\Desktop\LLGP\RayTracerFramework\Low-Level-Games-Programming\RayTracerSmall\MemoryPool.cpp(96,1): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-  Timing.cpp
-  Generating Code...
+﻿  sphere.cpp
+C:\Users\Desktop\Desktop\LLGP\RayTracerFramework\Low-Level-Games-Programming\RayTracerSmall\sphere.cpp(10,36): warning C4305: 'argument': truncation from 'double' to 'Template'
+          with
+          [
+              Template=float
+          ]
+C:\Users\Desktop\Desktop\LLGP\RayTracerFramework\Low-Level-Games-Programming\RayTracerSmall\sphere.cpp(11,37): warning C4305: 'argument': truncation from 'double' to 'Template'
+          with
+          [
+              Template=float
+          ]
+C:\Users\Desktop\Desktop\LLGP\RayTracerFramework\Low-Level-Games-Programming\RayTracerSmall\UI.h(82,1): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\Desktop\Desktop\LLGP\RayTracerFramework\Low-Level-Games-Programming\RayTracerSmall\sphere.cpp(120): message : see reference to function template instantiation 'Template UI::GetUserInput<std::string>(std::string)' being compiled
+          with
+          [
+              Template=std::string
+          ]
   RayTracerSmall.vcxproj -> C:\Users\Desktop\Desktop\LLGP\RayTracerFramework\Low-Level-Games-Programming\x64\Debug\RayTracerSmall.exe

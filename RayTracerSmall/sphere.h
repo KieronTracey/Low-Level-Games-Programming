@@ -1,62 +1,54 @@
 #ifndef _SPHERE_H_
 #define _SPHERE_H_
 
-#include <math.h>
-#include <sstream>
-#include <fstream>
-
-#include "UI.h"
 #include "Json/json.hpp"
 #include "MemoryManager.h"
-using namespace nlohmann;
-using namespace std;
+#include "UI.h"
+#include <fstream>
+#include <math.h>
+#include <sstream>
 
-//- Define for Vec3f Required at start of each header -//
-typedef Vec3<float> Vec3f;
+typedef Vector3<float> Vec3f;
+
+using namespace nlohmann; //for Json
+using namespace std;
 
 class Sphere
 {
 public:
 
-	//- Manager Methods -//
-	Sphere();
-	~Sphere();
+	Vec3f OBJ_surfcolour;
+	Vec3f OBJ_emisscolour;
+	float OBJ_transparency;
+	float OBJ_reflection;
+	Vec3f OBJ_center;
+	float OBJ_radius;
+	string OBJ_name;// stuff for object ^
+	Vec3f OBJ_startpos;// for anim
+	Vec3f OBJ_endpos; // for anim
 
+	void UIchange();
+	void ConvertOBJtoJSON(json* Jdata, int fjindex);
+	void ConvertJSONtoOBJ(json* Jdata, int fjindex);
+	void outputCurrentValues();
 
-	//- User Accessed/Defined -//
-	//- Visual Variables-//
-	string ms_objectName;
-	Vec3f m_center;
-	float mf_radius;
-	Vec3f m_surfaceColor, m_emissionColor;
-	float mf_transparency, mf_reflection;
+	bool intersecting(const Vec3f& rayOrigin, const Vec3f& rayDirection, float& temp1, float& temp2);
+	UI* spUI;
 
-	//- Aimation Variables -//
-	Vec3f m_startPosition, m_endPosition;
-
-	void UIAlterValues();
-	void ObjectToJson(json* ap_j, int a_index);
-	void JsonToObject(json* ap_j, int a_index);
-	void DisplayCurrentProperties();
-
-
-	//- Developer Accessed/Defined -//
-	bool intersect(const Vec3f& rayorig, const Vec3f& raydir, float& t0, float& t1);
-	UI* mp_ui;
+	template<typename Template>
+	void ChangeVar(Template input, Template* variableToChange);
 
 	void* operator new(size_t size);
-	void operator delete(void* pMem);
+	void operator delete(void* mem);
 
-	//- Templates -//
-	template<typename T>
-	void ChangeVar(T a_input, T* ap_varToChange);
-
+	Sphere();
+	~Sphere();
 };
 
-template<typename T>
-void Sphere::ChangeVar(T a_input, T* ap_varToChange)
+template<typename Template>
+void Sphere::ChangeVar(Template input, Template* variableToChange)
 {
-	*ap_varToChange = a_input;
+	*variableToChange = input;
 }
 
-#endif // !_SPHERE_H_
+#endif

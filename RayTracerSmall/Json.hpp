@@ -2675,11 +2675,11 @@ namespace nlohmann
     namespace detail
     {
         // alias templates to reduce boilerplate
-        template<bool B, typename T = void>
-        using enable_if_t = typename std::enable_if<B, T>::type;
+        template<bool B, typename Template = void>
+        using enable_if_t = typename std::enable_if<B, Template>::type;
 
-        template<typename T>
-        using uncvref_t = typename std::remove_cv<typename std::remove_reference<T>::type>::type;
+        template<typename Template>
+        using uncvref_t = typename std::remove_cv<typename std::remove_reference<Template>::type>::type;
 
         // implementation of C++14 index_sequence and affiliates
         // source: https://stackoverflow.com/a/32223343
@@ -2717,14 +2717,14 @@ namespace nlohmann
         template<> struct priority_tag<0> {};
 
         // taken from ranges-v3
-        template<typename T>
+        template<typename Template>
         struct static_const
         {
-            static constexpr T value{};
+            static constexpr Template value{};
         };
 
-        template<typename T>
-        constexpr T static_const<T>::value;
+        template<typename Template>
+        constexpr Template static_const<Template>::value;
     }  // namespace detail
 }  // namespace nlohmann
 
@@ -2780,25 +2780,25 @@ namespace nlohmann
 
         // This is required as some compilers implement std::iterator_traits in a way that
         // doesn't work with SFINAE. See https://github.com/nlohmann/json/issues/1341.
-        template<typename T, typename = void>
+        template<typename Template, typename = void>
         struct iterator_traits
         {
         };
 
-        template<typename T>
-        struct iterator_traits < T, enable_if_t < !std::is_pointer<T>::value >>
-            : iterator_types<T>
+        template<typename Template>
+        struct iterator_traits < Template, enable_if_t < !std::is_pointer<Template>::value >>
+            : iterator_types<Template>
         {
         };
 
-        template<typename T>
-        struct iterator_traits<T*, enable_if_t<std::is_object<T>::value>>
+        template<typename Template>
+        struct iterator_traits<Template*, enable_if_t<std::is_object<Template>::value>>
         {
             using iterator_category = std::random_access_iterator_tag;
-            using value_type = T;
+            using value_type = Template;
             using difference_type = ptrdiff_t;
-            using pointer = T*;
-            using reference = T&;
+            using pointer = Template*;
+            using reference = Template&;
         };
     } // namespace detail
 } // namespace nlohmann
@@ -2892,7 +2892,7 @@ namespace nlohmann
     ([argument-dependent lookup](https://en.cppreference.com/w/cpp/language/adl))
     for serialization.
     */
-    template<typename T = void, typename SFINAE = void>
+    template<typename Template = void, typename SFINAE = void>
     struct adl_serializer;
 
     template<template<typename U, typename V, typename... Args> class ObjectType =
@@ -2903,7 +2903,7 @@ namespace nlohmann
         class NumberUnsignedType = std::uint64_t,
         class NumberFloatType = double,
         template<typename U> class AllocatorType = std::allocator,
-        template<typename T, typename SFINAE = void> class JSONSerializer =
+        template<typename Template, typename SFINAE = void> class JSONSerializer =
         adl_serializer,
         class BinaryType = std::vector<std::uint8_t>>
         class basic_json;
@@ -2932,7 +2932,7 @@ namespace nlohmann
     */
     using json = basic_json<>;
 
-    template<class Key, class T, class IgnoredLess, class Allocator>
+    template<class Key, class Template, class IgnoredLess, class Allocator>
     struct ordered_map;
 
     /*!
@@ -2989,99 +2989,99 @@ namespace nlohmann
         template<typename>
         struct is_json_ref : std::false_type {};
 
-        template<typename T>
-        struct is_json_ref<json_ref<T>> : std::true_type {};
+        template<typename Template>
+        struct is_json_ref<json_ref<Template>> : std::true_type {};
 
         //////////////////////////
         // aliases for detected //
         //////////////////////////
 
-        template<typename T>
-        using mapped_type_t = typename T::mapped_type;
+        template<typename Template>
+        using mapped_type_t = typename Template::mapped_type;
 
-        template<typename T>
-        using key_type_t = typename T::key_type;
+        template<typename Template>
+        using key_type_t = typename Template::key_type;
 
-        template<typename T>
-        using value_type_t = typename T::value_type;
+        template<typename Template>
+        using value_type_t = typename Template::value_type;
 
-        template<typename T>
-        using difference_type_t = typename T::difference_type;
+        template<typename Template>
+        using difference_type_t = typename Template::difference_type;
 
-        template<typename T>
-        using pointer_t = typename T::pointer;
+        template<typename Template>
+        using pointer_t = typename Template::pointer;
 
-        template<typename T>
-        using reference_t = typename T::reference;
+        template<typename Template>
+        using reference_t = typename Template::reference;
 
-        template<typename T>
-        using iterator_category_t = typename T::iterator_category;
+        template<typename Template>
+        using iterator_category_t = typename Template::iterator_category;
 
-        template<typename T>
-        using iterator_t = typename T::iterator;
+        template<typename Template>
+        using iterator_t = typename Template::iterator;
 
-        template<typename T, typename... Args>
-        using to_json_function = decltype(T::to_json(std::declval<Args>()...));
+        template<typename Template, typename... Args>
+        using to_json_function = decltype(Template::to_json(std::declval<Args>()...));
 
-        template<typename T, typename... Args>
-        using from_json_function = decltype(T::from_json(std::declval<Args>()...));
+        template<typename Template, typename... Args>
+        using from_json_function = decltype(Template::from_json(std::declval<Args>()...));
 
-        template<typename T, typename U>
-        using get_template_function = decltype(std::declval<T>().template get<U>());
+        template<typename Template, typename U>
+        using get_template_function = decltype(std::declval<Template>().template get<U>());
 
         // trait checking if JSONSerializer<T>::from_json(json const&, udt&) exists
-        template<typename BasicJsonType, typename T, typename = void>
+        template<typename BasicJsonType, typename Template, typename = void>
         struct has_from_json : std::false_type {};
 
         // trait checking if j.get<T> is valid
         // use this trait instead of std::is_constructible or std::is_convertible,
         // both rely on, or make use of implicit conversions, and thus fail when T
         // has several constructors/operator= (see https://github.com/nlohmann/json/issues/958)
-        template <typename BasicJsonType, typename T>
+        template <typename BasicJsonType, typename Template>
         struct is_getable
         {
-            static constexpr bool value = is_detected<get_template_function, const BasicJsonType&, T>::value;
+            static constexpr bool value = is_detected<get_template_function, const BasicJsonType&, Template>::value;
         };
 
-        template<typename BasicJsonType, typename T>
-        struct has_from_json < BasicJsonType, T,
-            enable_if_t < !is_basic_json<T>::value >>
+        template<typename BasicJsonType, typename Template>
+        struct has_from_json < BasicJsonType, Template,
+            enable_if_t < !is_basic_json<Template>::value >>
         {
-            using serializer = typename BasicJsonType::template json_serializer<T, void>;
+            using serializer = typename BasicJsonType::template json_serializer<Template, void>;
 
             static constexpr bool value =
                 is_detected_exact<void, from_json_function, serializer,
-                const BasicJsonType&, T&>::value;
+                const BasicJsonType&, Template&>::value;
         };
 
         // This trait checks if JSONSerializer<T>::from_json(json const&) exists
         // this overload is used for non-default-constructible user-defined-types
-        template<typename BasicJsonType, typename T, typename = void>
+        template<typename BasicJsonType, typename Template, typename = void>
         struct has_non_default_from_json : std::false_type {};
 
-        template<typename BasicJsonType, typename T>
-        struct has_non_default_from_json < BasicJsonType, T, enable_if_t < !is_basic_json<T>::value >>
+        template<typename BasicJsonType, typename Template>
+        struct has_non_default_from_json < BasicJsonType, Template, enable_if_t < !is_basic_json<Template>::value >>
         {
-            using serializer = typename BasicJsonType::template json_serializer<T, void>;
+            using serializer = typename BasicJsonType::template json_serializer<Template, void>;
 
             static constexpr bool value =
-                is_detected_exact<T, from_json_function, serializer,
+                is_detected_exact<Template, from_json_function, serializer,
                 const BasicJsonType&>::value;
         };
 
         // This trait checks if BasicJsonType::json_serializer<T>::to_json exists
         // Do not evaluate the trait when T is a basic_json type, to avoid template instantiation infinite recursion.
-        template<typename BasicJsonType, typename T, typename = void>
+        template<typename BasicJsonType, typename Template, typename = void>
         struct has_to_json : std::false_type {};
 
-        template<typename BasicJsonType, typename T>
-        struct has_to_json < BasicJsonType, T, enable_if_t < !is_basic_json<T>::value >>
+        template<typename BasicJsonType, typename Template>
+        struct has_to_json < BasicJsonType, Template, enable_if_t < !is_basic_json<Template>::value >>
         {
-            using serializer = typename BasicJsonType::template json_serializer<T, void>;
+            using serializer = typename BasicJsonType::template json_serializer<Template, void>;
 
             static constexpr bool value =
                 is_detected_exact<void, to_json_function, serializer, BasicJsonType&,
-                T>::value;
+                Template>::value;
         };
 
 
@@ -3089,14 +3089,14 @@ namespace nlohmann
         // is_ functions //
         ///////////////////
 
-        template<typename T, typename = void>
+        template<typename Template, typename = void>
         struct is_iterator_traits : std::false_type {};
 
-        template<typename T>
-        struct is_iterator_traits<iterator_traits<T>>
+        template<typename Template>
+        struct is_iterator_traits<iterator_traits<Template>>
         {
         private:
-            using traits = iterator_traits<T>;
+            using traits = iterator_traits<Template>;
 
         public:
             static constexpr auto value =
@@ -3109,11 +3109,11 @@ namespace nlohmann
 
         // source: https://stackoverflow.com/a/37193089/4116453
 
-        template<typename T, typename = void>
+        template<typename Template, typename = void>
         struct is_complete_type : std::false_type {};
 
-        template<typename T>
-        struct is_complete_type<T, decltype(void(sizeof(T)))> : std::true_type {};
+        template<typename Template>
+        struct is_complete_type<Template, decltype(void(sizeof(Template)))> : std::true_type {};
 
         template<typename BasicJsonType, typename CompatibleObjectType,
             typename = void>
@@ -3527,9 +3527,9 @@ namespace nlohmann
         }
 
         // forward_list doesn't have an insert method
-        template<typename BasicJsonType, typename T, typename Allocator,
-            enable_if_t<is_getable<BasicJsonType, T>::value, int> = 0>
-            void from_json(const BasicJsonType& j, std::forward_list<T, Allocator>& l)
+        template<typename BasicJsonType, typename Template, typename Allocator,
+            enable_if_t<is_getable<BasicJsonType, Template>::value, int> = 0>
+            void from_json(const BasicJsonType& j, std::forward_list<Template, Allocator>& l)
         {
             if (JSON_HEDLEY_UNLIKELY(!j.is_array()))
             {
@@ -3539,14 +3539,14 @@ namespace nlohmann
             std::transform(j.rbegin(), j.rend(),
                 std::front_inserter(l), [](const BasicJsonType& i)
                 {
-                    return i.template get<T>();
+                    return i.template get<Template>();
                 });
         }
 
         // valarray doesn't have an insert method
-        template<typename BasicJsonType, typename T,
-            enable_if_t<is_getable<BasicJsonType, T>::value, int> = 0>
-            void from_json(const BasicJsonType& j, std::valarray<T>& l)
+        template<typename BasicJsonType, typename Template,
+            enable_if_t<is_getable<BasicJsonType, Template>::value, int> = 0>
+            void from_json(const BasicJsonType& j, std::valarray<Template>& l)
         {
             if (JSON_HEDLEY_UNLIKELY(!j.is_array()))
             {
@@ -3556,17 +3556,17 @@ namespace nlohmann
             std::transform(j.begin(), j.end(), std::begin(l),
                 [](const BasicJsonType& elem)
                 {
-                    return elem.template get<T>();
+                    return elem.template get<Template>();
                 });
         }
 
-        template<typename BasicJsonType, typename T, std::size_t N>
-        auto from_json(const BasicJsonType& j, T(&arr)[N])
-            -> decltype(j.template get<T>(), void())
+        template<typename BasicJsonType, typename Template, std::size_t N>
+        auto from_json(const BasicJsonType& j, Template(&arr)[N])
+            -> decltype(j.template get<Template>(), void())
         {
             for (std::size_t i = 0; i < N; ++i)
             {
-                arr[i] = j.at(i).template get<T>();
+                arr[i] = j.at(i).template get<Template>();
             }
         }
 
@@ -3576,14 +3576,14 @@ namespace nlohmann
             arr = *j.template get_ptr<const typename BasicJsonType::array_t*>();
         }
 
-        template<typename BasicJsonType, typename T, std::size_t N>
-        auto from_json_array_impl(const BasicJsonType& j, std::array<T, N>& arr,
+        template<typename BasicJsonType, typename Template, std::size_t N>
+        auto from_json_array_impl(const BasicJsonType& j, std::array<Template, N>& arr,
             priority_tag<2> /*unused*/)
-            -> decltype(j.template get<T>(), void())
+            -> decltype(j.template get<Template>(), void())
         {
             for (std::size_t i = 0; i < N; ++i)
             {
-                arr[i] = j.at(i).template get<T>();
+                arr[i] = j.at(i).template get<Template>();
             }
         }
 
@@ -3783,8 +3783,8 @@ namespace nlohmann
 
         struct from_json_fn
         {
-            template<typename BasicJsonType, typename T>
-            auto operator()(const BasicJsonType& j, T& val) const
+            template<typename BasicJsonType, typename Template>
+            auto operator()(const BasicJsonType& j, Template& val) const
                 noexcept(noexcept(from_json(j, val)))
                 -> decltype(from_json(j, val), void())
             {
@@ -4157,9 +4157,9 @@ namespace nlohmann
                 j.assert_invariant();
             }
 
-            template<typename BasicJsonType, typename T,
-                enable_if_t<std::is_convertible<T, BasicJsonType>::value, int> = 0>
-                static void construct(BasicJsonType& j, const std::valarray<T>& arr)
+            template<typename BasicJsonType, typename Template,
+                enable_if_t<std::is_convertible<Template, BasicJsonType>::value, int> = 0>
+                static void construct(BasicJsonType& j, const std::valarray<Template>& arr)
             {
                 j.m_type = value_t::array;
                 j.m_value = value_t::array;
@@ -4208,9 +4208,9 @@ namespace nlohmann
         // to_json //
         /////////////
 
-        template<typename BasicJsonType, typename T,
-            enable_if_t<std::is_same<T, typename BasicJsonType::boolean_t>::value, int> = 0>
-            void to_json(BasicJsonType& j, T b) noexcept
+        template<typename BasicJsonType, typename Template,
+            enable_if_t<std::is_same<Template, typename BasicJsonType::boolean_t>::value, int> = 0>
+            void to_json(BasicJsonType& j, Template b) noexcept
         {
             external_constructor<value_t::boolean>::construct(j, b);
         }
@@ -4282,9 +4282,9 @@ namespace nlohmann
             external_constructor<value_t::binary>::construct(j, bin);
         }
 
-        template<typename BasicJsonType, typename T,
-            enable_if_t<std::is_convertible<T, BasicJsonType>::value, int> = 0>
-            void to_json(BasicJsonType& j, const std::valarray<T>& arr)
+        template<typename BasicJsonType, typename Template,
+            enable_if_t<std::is_convertible<Template, BasicJsonType>::value, int> = 0>
+            void to_json(BasicJsonType& j, const std::valarray<Template>& arr)
         {
             external_constructor<value_t::array>::construct(j, std::move(arr));
         }
@@ -4309,11 +4309,11 @@ namespace nlohmann
         }
 
         template <
-            typename BasicJsonType, typename T, std::size_t N,
+            typename BasicJsonType, typename Template, std::size_t N,
             enable_if_t < !std::is_constructible<typename BasicJsonType::string_t,
-            const T(&)[N]>::value,
+            const Template(&)[N]>::value,
             int > = 0 >
-            void to_json(BasicJsonType& j, const T(&arr)[N])
+            void to_json(BasicJsonType& j, const Template(&arr)[N])
         {
             external_constructor<value_t::array>::construct(j, arr);
         }
@@ -4325,9 +4325,9 @@ namespace nlohmann
         }
 
         // for https://github.com/nlohmann/json/pull/1134
-        template<typename BasicJsonType, typename T,
-            enable_if_t<std::is_same<T, iteration_proxy_value<typename BasicJsonType::iterator>>::value, int> = 0>
-            void to_json(BasicJsonType& j, const T& b)
+        template<typename BasicJsonType, typename Template,
+            enable_if_t<std::is_same<Template, iteration_proxy_value<typename BasicJsonType::iterator>>::value, int> = 0>
+            void to_json(BasicJsonType& j, const Template& b)
         {
             j = { {b.key(), b.value()} };
         }
@@ -4338,19 +4338,19 @@ namespace nlohmann
             j = { std::get<Idx>(t)... };
         }
 
-        template<typename BasicJsonType, typename T, enable_if_t<is_constructible_tuple<BasicJsonType, T>::value, int > = 0>
-        void to_json(BasicJsonType& j, const T& t)
+        template<typename BasicJsonType, typename Template, enable_if_t<is_constructible_tuple<BasicJsonType, Template>::value, int > = 0>
+        void to_json(BasicJsonType& j, const Template& t)
         {
-            to_json_tuple_impl(j, t, make_index_sequence<std::tuple_size<T>::value> {});
+            to_json_tuple_impl(j, t, make_index_sequence<std::tuple_size<Template>::value> {});
         }
 
         struct to_json_fn
         {
-            template<typename BasicJsonType, typename T>
-            auto operator()(BasicJsonType& j, T&& val) const noexcept(noexcept(to_json(j, std::forward<T>(val))))
-                -> decltype(to_json(j, std::forward<T>(val)), void())
+            template<typename BasicJsonType, typename Template>
+            auto operator()(BasicJsonType& j, Template&& val) const noexcept(noexcept(to_json(j, std::forward<Template>(val))))
+                -> decltype(to_json(j, std::forward<Template>(val)), void())
             {
-                return to_json(j, std::forward<T>(val));
+                return to_json(j, std::forward<Template>(val));
             }
         };
     }  // namespace detail
@@ -5059,10 +5059,10 @@ namespace nlohmann
             }
         };
 
-        template<typename T>
+        template<typename Template>
         struct is_iterator_of_multibyte
         {
-            using value_type = typename std::iterator_traits<T>::value_type;
+            using value_type = typename std::iterator_traits<Template>::value_type;
             enum
             {
                 value = sizeof(value_type) > 1
@@ -5135,8 +5135,8 @@ namespace nlohmann
             return input_adapter(ptr, ptr + length);
         }
 
-        template<typename T, std::size_t N>
-        auto input_adapter(T(&array)[N]) -> decltype(input_adapter(array, array + N))
+        template<typename Template, std::size_t N>
+        auto input_adapter(Template(&array)[N]) -> decltype(input_adapter(array, array + N))
         {
             return input_adapter(array, array + N);
         }
@@ -7518,53 +7518,53 @@ namespace nlohmann
 {
     namespace detail
     {
-        template<typename T>
-        using null_function_t = decltype(std::declval<T&>().null());
+        template<typename Template>
+        using null_function_t = decltype(std::declval<Template&>().null());
 
-        template<typename T>
+        template<typename Template>
         using boolean_function_t =
-            decltype(std::declval<T&>().boolean(std::declval<bool>()));
+            decltype(std::declval<Template&>().boolean(std::declval<bool>()));
 
-        template<typename T, typename Integer>
+        template<typename Template, typename Integer>
         using number_integer_function_t =
-            decltype(std::declval<T&>().number_integer(std::declval<Integer>()));
+            decltype(std::declval<Template&>().number_integer(std::declval<Integer>()));
 
-        template<typename T, typename Unsigned>
+        template<typename Template, typename Unsigned>
         using number_unsigned_function_t =
-            decltype(std::declval<T&>().number_unsigned(std::declval<Unsigned>()));
+            decltype(std::declval<Template&>().number_unsigned(std::declval<Unsigned>()));
 
-        template<typename T, typename Float, typename String>
-        using number_float_function_t = decltype(std::declval<T&>().number_float(
+        template<typename Template, typename Float, typename String>
+        using number_float_function_t = decltype(std::declval<Template&>().number_float(
             std::declval<Float>(), std::declval<const String&>()));
 
-        template<typename T, typename String>
+        template<typename Template, typename String>
         using string_function_t =
-            decltype(std::declval<T&>().string(std::declval<String&>()));
+            decltype(std::declval<Template&>().string(std::declval<String&>()));
 
-        template<typename T, typename Binary>
+        template<typename Template, typename Binary>
         using binary_function_t =
-            decltype(std::declval<T&>().binary(std::declval<Binary&>()));
+            decltype(std::declval<Template&>().binary(std::declval<Binary&>()));
 
-        template<typename T>
+        template<typename Template>
         using start_object_function_t =
-            decltype(std::declval<T&>().start_object(std::declval<std::size_t>()));
+            decltype(std::declval<Template&>().start_object(std::declval<std::size_t>()));
 
-        template<typename T, typename String>
+        template<typename Template, typename String>
         using key_function_t =
-            decltype(std::declval<T&>().key(std::declval<String&>()));
+            decltype(std::declval<Template&>().key(std::declval<String&>()));
 
-        template<typename T>
-        using end_object_function_t = decltype(std::declval<T&>().end_object());
+        template<typename Template>
+        using end_object_function_t = decltype(std::declval<Template&>().end_object());
 
-        template<typename T>
+        template<typename Template>
         using start_array_function_t =
-            decltype(std::declval<T&>().start_array(std::declval<std::size_t>()));
+            decltype(std::declval<Template&>().start_array(std::declval<std::size_t>()));
 
-        template<typename T>
-        using end_array_function_t = decltype(std::declval<T&>().end_array());
+        template<typename Template>
+        using end_array_function_t = decltype(std::declval<Template&>().end_array());
 
-        template<typename T, typename Exception>
-        using parse_error_function_t = decltype(std::declval<T&>().parse_error(
+        template<typename Template, typename Exception>
+        using parse_error_function_t = decltype(std::declval<Template&>().parse_error(
             std::declval<std::size_t>(), std::declval<const std::string&>(),
             std::declval<const Exception&>()));
 
@@ -16399,13 +16399,13 @@ namespace nlohmann
 
     /// ordered_map: a minimal map-like container that preserves insertion order
     /// for use within nlohmann::basic_json<ordered_map>
-    template <class Key, class T, class IgnoredLess = std::less<Key>,
-        class Allocator = std::allocator<std::pair<const Key, T>>>
-        struct ordered_map : std::vector<std::pair<const Key, T>, Allocator>
+    template <class Key, class Template, class IgnoredLess = std::less<Key>,
+        class Allocator = std::allocator<std::pair<const Key, Template>>>
+        struct ordered_map : std::vector<std::pair<const Key, Template>, Allocator>
     {
         using key_type = Key;
-        using mapped_type = T;
-        using Container = std::vector<std::pair<const Key, T>, Allocator>;
+        using mapped_type = Template;
+        using Container = std::vector<std::pair<const Key, Template>, Allocator>;
         using typename Container::iterator;
         using typename Container::const_iterator;
         using typename Container::size_type;
@@ -16417,10 +16417,10 @@ namespace nlohmann
         template <class It>
         ordered_map(It first, It last, const Allocator& alloc = Allocator())
             : Container{ first, last, alloc } {}
-        ordered_map(std::initializer_list<T> init, const Allocator& alloc = Allocator())
+        ordered_map(std::initializer_list<Template> init, const Allocator& alloc = Allocator())
             : Container{ init, alloc } {}
 
-        std::pair<iterator, bool> emplace(const key_type& key, T&& t)
+        std::pair<iterator, bool> emplace(const key_type& key, Template&& t)
         {
             for (auto it = this->begin(); it != this->end(); ++it)
             {
@@ -16433,17 +16433,17 @@ namespace nlohmann
             return { --this->end(), true };
         }
 
-        T& operator[](const Key& key)
+        Template& operator[](const Key& key)
         {
-            return emplace(key, T{}).first->second;
+            return emplace(key, Template{}).first->second;
         }
 
-        const T& operator[](const Key& key) const
+        const Template& operator[](const Key& key) const
         {
             return at(key);
         }
 
-        T& at(const Key& key)
+        Template& at(const Key& key)
         {
             for (auto it = this->begin(); it != this->end(); ++it)
             {
@@ -16456,7 +16456,7 @@ namespace nlohmann
             throw std::out_of_range("key not found");
         }
 
-        const T& at(const Key& key) const
+        const Template& at(const Key& key) const
         {
             for (auto it = this->begin(); it != this->end(); ++it)
             {
@@ -16713,8 +16713,8 @@ namespace nlohmann
         using value_t = detail::value_t;
         /// JSON Pointer, see @ref nlohmann::json_pointer
         using json_pointer = ::nlohmann::json_pointer<basic_json>;
-        template<typename T, typename SFINAE>
-        using json_serializer = JSONSerializer<T, SFINAE>;
+        template<typename Template, typename SFINAE>
+        using json_serializer = JSONSerializer<Template, SFINAE>;
         /// how to treat decoding errors
         using error_handler_t = detail::error_handler_t;
         /// how to treat CBOR tags
@@ -17400,18 +17400,18 @@ namespace nlohmann
     private:
 
         /// helper for exception-safe object creation
-        template<typename T, typename... Args>
+        template<typename Template, typename... Args>
         JSON_HEDLEY_RETURNS_NON_NULL
-            static T* create(Args&& ... args)
+            static Template* create(Args&& ... args)
         {
-            AllocatorType<T> alloc;
-            using AllocatorTraits = std::allocator_traits<AllocatorType<T>>;
+            AllocatorType<Template> alloc;
+            using AllocatorTraits = std::allocator_traits<AllocatorType<Template>>;
 
-            auto deleter = [&](T* object)
+            auto deleter = [&](Template* object)
             {
                 AllocatorTraits::deallocate(alloc, object, 1);
             };
-            std::unique_ptr<T, decltype(deleter)> object(AllocatorTraits::allocate(alloc, 1), deleter);
+            std::unique_ptr<Template, decltype(deleter)> object(AllocatorTraits::allocate(alloc, 1), deleter);
             AllocatorTraits::construct(alloc, object.get(), std::forward<Args>(args)...);
             JSON_ASSERT(object != nullptr);
             return object.release();
@@ -19522,11 +19522,11 @@ namespace nlohmann
         }
 
         template <
-            typename T, std::size_t N,
-            typename Array = T(&)[N],
+            typename Template, std::size_t N,
+            typename Array = Template(&)[N],
             detail::enable_if_t <
             detail::has_from_json<basic_json_t, Array>::value, int > = 0 >
-            Array get_to(T(&v)[N]) const
+            Array get_to(Template(&v)[N]) const
             noexcept(noexcept(JSONSerializer<Array>::from_json(
                 std::declval<const basic_json_t&>(), v)))
         {
@@ -20156,9 +20156,9 @@ namespace nlohmann
 
         @since version 1.1.0
         */
-        template<typename T>
+        template<typename Template>
         JSON_HEDLEY_NON_NULL(2)
-            reference operator[](T* key)
+            reference operator[](Template* key)
         {
             // implicitly convert null to object
             if (is_null())
@@ -20207,9 +20207,9 @@ namespace nlohmann
 
         @since version 1.1.0
         */
-        template<typename T>
+        template<typename Template>
         JSON_HEDLEY_NON_NULL(2)
-            const_reference operator[](T* key) const
+            const_reference operator[](Template* key) const
         {
             // at only works for objects
             if (JSON_HEDLEY_LIKELY(is_object()))
@@ -23985,10 +23985,10 @@ namespace nlohmann
             return res ? result : basic_json(value_t::discarded);
         }
 
-        template<typename T>
+        template<typename Template>
         JSON_HEDLEY_WARN_UNUSED_RESULT
             JSON_HEDLEY_DEPRECATED_FOR(3.8.0, from_cbor(ptr, ptr + len))
-            static basic_json from_cbor(const T* ptr, std::size_t len,
+            static basic_json from_cbor(const Template* ptr, std::size_t len,
                 const bool strict = true,
                 const bool allow_exceptions = true,
                 const cbor_tag_handler_t tag_handler = cbor_tag_handler_t::error)
@@ -24127,10 +24127,10 @@ namespace nlohmann
         }
 
 
-        template<typename T>
+        template<typename Template>
         JSON_HEDLEY_WARN_UNUSED_RESULT
             JSON_HEDLEY_DEPRECATED_FOR(3.8.0, from_msgpack(ptr, ptr + len))
-            static basic_json from_msgpack(const T* ptr, std::size_t len,
+            static basic_json from_msgpack(const Template* ptr, std::size_t len,
                 const bool strict = true,
                 const bool allow_exceptions = true)
         {
@@ -24242,10 +24242,10 @@ namespace nlohmann
             return res ? result : basic_json(value_t::discarded);
         }
 
-        template<typename T>
+        template<typename Template>
         JSON_HEDLEY_WARN_UNUSED_RESULT
             JSON_HEDLEY_DEPRECATED_FOR(3.8.0, from_ubjson(ptr, ptr + len))
-            static basic_json from_ubjson(const T* ptr, std::size_t len,
+            static basic_json from_ubjson(const Template* ptr, std::size_t len,
                 const bool strict = true,
                 const bool allow_exceptions = true)
         {
@@ -24355,10 +24355,10 @@ namespace nlohmann
             return res ? result : basic_json(value_t::discarded);
         }
 
-        template<typename T>
+        template<typename Template>
         JSON_HEDLEY_WARN_UNUSED_RESULT
             JSON_HEDLEY_DEPRECATED_FOR(3.8.0, from_bson(ptr, ptr + len))
-            static basic_json from_bson(const T* ptr, std::size_t len,
+            static basic_json from_bson(const Template* ptr, std::size_t len,
                 const bool strict = true,
                 const bool allow_exceptions = true)
         {

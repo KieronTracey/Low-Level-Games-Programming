@@ -1,60 +1,134 @@
 #ifndef _VECTOR_TEMPLATE_H_
 #define _VECTOR_TEMPLATE_H_
 
-#include <iostream>
 #include <iomanip>
+#include <iostream>
 
-template<typename T>
-class Vec3
+template<typename Template>
+
+class Vector3
 {
 public:
-	T x, y, z;
-	Vec3() : x(T(0)), y(T(0)), z(T(0)) {}
-	Vec3(T xx) : x(xx), y(xx), z(xx) {}
-	Vec3(T xx, T yy, T zz) : x(xx), y(yy), z(zz) {}
-	Vec3& normalize()
+	Template x, y, z;
+
+	Vector3() : x(Template(0)), y(Template(0)), z(Template(0))
 	{
-		T nor2 = length2();
-		if (nor2 > 0) {
-			T invNor = 1 / sqrt(nor2);
-			x *= invNor, y *= invNor, z *= invNor;
+
+	}
+
+	Vector3(Template tempVar) : x(tempVar), y(tempVar), z(tempVar)
+	{
+
+	}
+	
+	Vector3(Template xTemp, Template yTemp, Template zTemp) : x(xTemp), y(yTemp), z(zTemp) 
+	{
+
+	}
+
+	Vector3& normalizeTemplate()
+	{
+		//work pleaz
+		Template normal2 = lengthB();
+		if (!normal2 < 0) {
+			Template invNormal; 
+			invNormal = 1 / sqrt(normal2);
+
+			x *= invNormal; 
+			y *= invNormal; 
+			z *= invNormal;
 		}
 		return *this;
 	}
-	Vec3<T> operator * (const T& f) const { return Vec3<T>(x * f, y * f, z * f); }
-	Vec3<T> operator * (const Vec3<T>& v) const { return Vec3<T>(x * v.x, y * v.y, z * v.z); }
-	T dot(const Vec3<T>& v) const { return x * v.x + y * v.y + z * v.z; }
-	Vec3<T> operator - (const Vec3<T>& v) const { return Vec3<T>(x - v.x, y - v.y, z - v.z); }
-	Vec3<T> operator + (const Vec3<T>& v) const { return Vec3<T>(x + v.x, y + v.y, z + v.z); }
-	Vec3<T>& operator += (const Vec3<T>& v) { x += v.x, y += v.y, z += v.z; return *this; }
-	Vec3<T>& operator *= (const Vec3<T>& v) { x *= v.x, y *= v.y, z *= v.z; return *this; }
-	Vec3<T> operator - () const { return Vec3<T>(-x, -y, -z); }
 
-	friend bool operator == (const Vec3<T>& a, const Vec3<T>& b) { return (a.x == b.x && a.y == b.y && a.z == b.z) ? true : false; }
-	friend bool operator != (const Vec3<T>& a, const Vec3<T>& b) { return !(a == b); }
-
-	T length2() const { return x * x + y * y + z * z; }
-	T length() const { return sqrt(length2()); }
-	friend std::ostream& operator << (std::ostream& os, const Vec3<T>& v)
+	Vector3<Template> operator * (const Template& f) const 
 	{
-		os << "[" << v.x << " " << v.y << " " << v.z << "]";
-		return os;
+		return Vector3<Template>(x * f, y * f, z * f); 
 	}
 
-	friend std::istream& operator >> (std::istream& in, Vec3<T>& v)
+	Vector3<Template> operator * (const Vector3<Template>& Vec) const 
+	{ 
+		return Vector3<Template>(x * Vec.x, y * Vec.y, z * Vec.z); 
+	}
+
+	Template mathVar(const Vector3<Template>& Vec) const 
 	{
-		string ls_inputData;
+		return x * Vec.x + y * Vec.y + z * Vec.z; //why this make break
+	} 
 
-		cout << std::setw(64) << "Enter X: " << flush; in >> ls_inputData; cout << std::setw(56) << flush;
-		v.x = std::stof(ls_inputData);
-		cout << std::setw(64) << "Enter Y: " << flush; in >> ls_inputData; cout << std::setw(56) << flush;
-		v.y = std::stof(ls_inputData);
-		cout << std::setw(64) << "Enter Z: " << flush; in >> ls_inputData; cout << std::setw(56) << "\r";
-		v.z = std::stof(ls_inputData);
+	Vector3<Template> operator - (const Vector3<Template>& Vec) const 
+	{
+		return Vector3<Template>(x - Vec.x, y - Vec.y, z - Vec.z); 
+	}
 
-		return in;
+	Vector3<Template> operator + (const Vector3<Template>& Vec) const 
+	{
+		return Vector3<Template>(x + Vec.x, y + Vec.y, z + Vec.z); 
+	}
+
+	Vector3<Template>& operator += (const Vector3<Template>& Vec) 
+	{
+		x += Vec.x, y += Vec.y, z += Vec.z; return *this; 
+	}
+
+	Vector3<Template>& operator *= (const Vector3<Template>& Vec) 
+	{
+		x *= Vec.x, y *= Vec.y, z *= Vec.z; return *this; 
+	}
+
+	Vector3<Template> operator - () const 
+	{
+		return Vector3<Template>(-x, -y, -z); 
+	}
+
+	friend bool operator == (const Vector3<Template>& temp1, const Vector3<Template>& temp2) 
+	{
+		return (temp1.x == temp2.x && temp1.y == temp2.y && temp1.z == temp2.z) ? true : false; 
+	}
+
+	friend bool operator != (const Vector3<Template>& temp1, const Vector3<Template>& temp2) 
+	{
+		return !(temp1 == temp2); 
+	}
+
+	Template lengthB() const 
+	{
+		return x * x + y * y + z * z; 
+	}
+
+	Template lengthA() const 
+	{
+		return sqrt(lengthB()); 
+	}
+
+	friend std::ostream& operator << (std::ostream& OpSys, const Vector3<Template>& Vec)
+	{
+		OpSys << "[" << Vec.x << " " << Vec.y << " " << Vec.z << "]";
+		return OpSys;
+	}
+
+	friend std::istream& operator >> (std::istream& Ent, Vector3<Template>& Vec)
+	{//fix later
+		string input;
+
+		std::cout << std::setw(64) << "Please input X: " << flush;
+		Ent >> input;
+		std::cout << std::setw(56) << flush;
+		Vec.x = std::stof(input);
+
+		std::cout << std::setw(64) << "Please input Y: " << flush;
+		Ent >> input;
+		std::cout << std::setw(56) << flush;
+		Vec.y = std::stof(input);
+
+		std::cout << std::setw(64) << "Please input Z: " << flush;
+		Ent >> input;
+		std::cout << std::setw(56) << "\r";
+		Vec.z = std::stof(input);
+
+		return Ent;
 	}
 };
 
 
-#endif // !_VECTOR_TEMPLATE_H_
+#endif

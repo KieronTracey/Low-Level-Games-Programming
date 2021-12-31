@@ -11,7 +11,7 @@
 #include "Timing.h"
 
 //- Define for Vec3f Required at start of each header -//
-typedef Vec3<float> Vec3f;
+typedef Vector3<float> Vec3f;
 
 class RenderingEngine
 {

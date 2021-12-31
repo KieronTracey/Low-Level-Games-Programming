@@ -18,7 +18,7 @@ void Timing::TimeTaken()
 	UI ui;
 	std::chrono::duration<double> diff = TimerEndTime - TimerStartTime;
 
-	std::cout << "Time Taken: " << diff.count();
+	std::cout << "Time Taken: " << diff.count() << endl;
 }
 
 Timing::Timing()

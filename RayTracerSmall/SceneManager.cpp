@@ -7,7 +7,7 @@ SceneManager* gp_selfSceneManager;
 void ViewSceneInfoWrapper() { gp_selfSceneManager->ViewSceneInfo(); };
 void LoadSceneWrapper() { gp_selfSceneManager->LoadScene(); };
 void SaveSceneWrapper() { gp_selfSceneManager->SaveScene(); };
-void EditSceneWrapper() { gp_selfSceneManager->mp_currentlySelected->UIAlterValues(); };
+void EditSceneWrapper() { gp_selfSceneManager->mp_currentlySelected->UIchange(); };
 void CreateSphereWrapper() { gp_selfSceneManager->CreateNewSphere(); };
 void EditSpheresWrapper() { gp_selfSceneManager->EditSpheres(); };
 void UpdateScelectedObjectWrapper() { gp_selfSceneManager->mp_currentlySelected = gp_selfSceneManager->mp_sceneObjects[*gp_selfSceneManager->mpi_selectedObjectToEdit]; };
@@ -83,7 +83,7 @@ void SceneManager::LoadScene()
 	for (int i = 0; i < l_json["ObjectCount"]; i++)
 	{
 		Sphere* lp_newSphere = new Sphere();
-		lp_newSphere->JsonToObject(&l_json, i);
+		lp_newSphere->ConvertJSONtoOBJ(&l_json, i);
 		mp_sceneObjects.push_back(lp_newSphere);
 		lp_newSphere = nullptr;
 	}
@@ -101,7 +101,7 @@ void SceneManager::SaveScene()
 	l_json["Animation Duriation"] = mf_duriation;
 	for (int i = 0; i < mp_sceneObjects.size(); i++)
 	{
-		mp_sceneObjects[i]->ObjectToJson(&l_json, i);
+		mp_sceneObjects[i]->ConvertOBJtoJSON(&l_json, i);
 	}
 	ofstream l_jsonFile("Scene Saves/" + ms_sceneName + ".json");
 	l_jsonFile << l_json << "\n";
@@ -110,7 +110,7 @@ void SceneManager::SaveScene()
 void SceneManager::CreateNewSphere()
 {
 	Sphere* lp_newSphere = new Sphere();
-	lp_newSphere->UIAlterValues();
+	lp_newSphere->UIchange();
 	mp_sceneObjects.push_back(lp_newSphere);
 	lp_newSphere = nullptr;
 
@@ -124,7 +124,7 @@ void SceneManager::EditSpheres()
 	//- Create Dynamic Spheres -//
 	for (int i = 0; i < mp_sceneObjects.size(); i++)
 	{
-		l_editSceneMenu.push_back(MenuOption(("Edit " + mp_sceneObjects[i]->ms_objectName + " :"), EditSceneWrapper));
+		l_editSceneMenu.push_back(MenuOption(("Edit " + mp_sceneObjects[i]->OBJ_name + " :"), EditSceneWrapper));
 	}
 
 	mp_ui->DisplayMenu(l_editSceneMenu, "Edit Scene Elements", UpdateScelectedObjectWrapper, mpi_selectedObjectToEdit);
@@ -149,7 +149,7 @@ void SceneManager::RefreshScene()
 	for (int i = 0; i < l_json["ObjectCount"]; i++)
 	{
 		Sphere* lp_newSphere = new Sphere();
-		lp_newSphere->JsonToObject(&l_json, i);
+		lp_newSphere->ConvertJSONtoOBJ(&l_json, i);
 		mp_sceneObjects.push_back(lp_newSphere);
 		lp_newSphere = nullptr;
 	}
