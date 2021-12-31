@@ -15,7 +15,7 @@ public:
 	//- User Acsessed -//
 	UI* mp_ui;
 	string ms_sceneName;
-	vector<Sphere*> mp_sceneObjects;
+	vector<Sphere*> objectsInScene;
 
 	void Menu();
 	void ViewSceneInfo();
@@ -27,13 +27,13 @@ public:
 
 	//- Developer Accsessed -//
 	vector<Sphere*> GetFrameToRender(int frameCount);
-	void RefreshScene();
+	void sceneRefresh();
 
-	bool mb_loadedFile;
+	bool fileLoaded;
 	int* mpi_selectedObjectToEdit;
 	Sphere* mp_currentlySelected;
-	float mf_duriation;
-	int mi_framesPerSecond;
+	float sceneLength;
+	int sceneFPS;
 
 	//- Templates -//
 

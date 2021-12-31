@@ -51,7 +51,7 @@ RenderingEngine* gp_renderingEngine;
 void SceneManagerWrapper() { gp_sceneManager->Menu(); };
 void UIWrapper() { gp_ui->SettingsMenu(); };
 void DebuggerWrapper() { /*gp_debugger->Menu(); */ };
-void RendererWrapper() { gp_renderingEngine->Menu(); };
+void RendererWrapper() { gp_renderingEngine->MainMenu(); };
 void AnimationSettingsWrapper() {/*gp_animator->SettingsMenu()*/ };
 //- End Of Wrappers-//
 

@@ -1,4 +1,57 @@
-﻿  sphere.cpp
+﻿  Chunk.cpp
+  GlobalOverides.cpp
+  main.cpp
+C:\Users\Desktop\Desktop\LLGP\RayTracerFramework\Low-Level-Games-Programming\RayTracerSmall\definitions.h(7,1): warning C4005: 'INFINITY': macro redefinition
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\ucrt\corecrt_math.h(90): message : see previous definition of 'INFINITY'
+  MemoryManager.cpp
+C:\Users\Desktop\Desktop\LLGP\RayTracerFramework\Low-Level-Games-Programming\RayTracerSmall\MemoryManager.cpp(24,35): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+  MemoryPool.cpp
+C:\Users\Desktop\Desktop\LLGP\RayTracerFramework\Low-Level-Games-Programming\RayTracerSmall\MemoryPool.cpp(1,10): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+C:\Users\Desktop\Desktop\LLGP\RayTracerFramework\Low-Level-Games-Programming\RayTracerSmall\MemoryPool.cpp(17,63): warning C4267: '-=': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\Desktop\Desktop\LLGP\RayTracerFramework\Low-Level-Games-Programming\RayTracerSmall\MemoryPool.cpp(28,34): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\Desktop\Desktop\LLGP\RayTracerFramework\Low-Level-Games-Programming\RayTracerSmall\MemoryPool.cpp(78,51): warning C4267: '+=': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\Desktop\Desktop\LLGP\RayTracerFramework\Low-Level-Games-Programming\RayTracerSmall\MemoryPool.cpp(81,44): warning C4267: '+=': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\Desktop\Desktop\LLGP\RayTracerFramework\Low-Level-Games-Programming\RayTracerSmall\MemoryPool.cpp(96,1): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+  RenderingEngine.cpp
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\ucrt\corecrt_math.h(90,1): warning C4005: 'INFINITY': macro redefinition
+C:\Users\Desktop\Desktop\LLGP\RayTracerFramework\Low-Level-Games-Programming\RayTracerSmall\definitions.h(7): message : see previous definition of 'INFINITY'
+C:\Users\Desktop\Desktop\LLGP\RayTracerFramework\Low-Level-Games-Programming\RayTracerSmall\RenderingEngine.cpp(85,15): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\Desktop\Desktop\LLGP\RayTracerFramework\Low-Level-Games-Programming\RayTracerSmall\RenderingEngine.cpp(123,44): warning C4305: 'argument': truncation from 'double' to 'Template'
+          with
+          [
+              Template=float
+          ]
+C:\Users\Desktop\Desktop\LLGP\RayTracerFramework\Low-Level-Games-Programming\RayTracerSmall\RenderingEngine.cpp(130,18): warning C4305: 'initializing': truncation from 'double' to 'float'
+C:\Users\Desktop\Desktop\LLGP\RayTracerFramework\Low-Level-Games-Programming\RayTracerSmall\RenderingEngine.cpp(143,58): warning C4305: 'argument': truncation from 'double' to 'const float'
+C:\Users\Desktop\Desktop\LLGP\RayTracerFramework\Low-Level-Games-Programming\RayTracerSmall\RenderingEngine.cpp(143,32): warning C4244: 'argument': conversion from 'double' to 'const float', possible loss of data
+C:\Users\Desktop\Desktop\LLGP\RayTracerFramework\Low-Level-Games-Programming\RayTracerSmall\RenderingEngine.cpp(155,18): warning C4305: 'initializing': truncation from 'double' to 'float'
+C:\Users\Desktop\Desktop\LLGP\RayTracerFramework\Low-Level-Games-Programming\RayTracerSmall\RenderingEngine.cpp(244,24): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Desktop\Desktop\LLGP\RayTracerFramework\Low-Level-Games-Programming\RayTracerSmall\RenderingEngine.cpp(246,25): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Desktop\Desktop\LLGP\RayTracerFramework\Low-Level-Games-Programming\RayTracerSmall\RenderingEngine.cpp(248,13): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\Desktop\Desktop\LLGP\RayTracerFramework\Low-Level-Games-Programming\RayTracerSmall\RenderingEngine.cpp(249,13): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\Desktop\Desktop\LLGP\RayTracerFramework\Low-Level-Games-Programming\RayTracerSmall\RenderingEngine.cpp(263,24): warning C4018: '<': signed/unsigned mismatch
+C:\Users\Desktop\Desktop\LLGP\RayTracerFramework\Low-Level-Games-Programming\RayTracerSmall\VecTemplate.h(33,7): warning C4804: '<': unsafe use of type 'bool' in operation
+C:\Users\Desktop\Desktop\LLGP\RayTracerFramework\Low-Level-Games-Programming\RayTracerSmall\VecTemplate.h(30): message : while compiling class template member function 'Vector3<float> &Vector3<float>::normalizeTemplate(void)'
+C:\Users\Desktop\Desktop\LLGP\RayTracerFramework\Low-Level-Games-Programming\RayTracerSmall\RenderingEngine.cpp(129): message : see reference to function template instantiation 'Vector3<float> &Vector3<float>::normalizeTemplate(void)' being compiled
+C:\Users\Desktop\Desktop\LLGP\RayTracerFramework\Low-Level-Games-Programming\RayTracerSmall\sphere.h(20): message : see reference to class template instantiation 'Vector3<float>' being compiled
+  SceneManager.cpp
+C:\Users\Desktop\Desktop\LLGP\RayTracerFramework\Low-Level-Games-Programming\RayTracerSmall\SceneManager.cpp(14,113): warning C4244: '=': conversion from 'Template' to 'int', possible loss of data
+          with
+          [
+              Template=float
+          ]
+C:\Users\Desktop\Desktop\LLGP\RayTracerFramework\Low-Level-Games-Programming\RayTracerSmall\SceneManager.cpp(15,120): warning C4244: '=': conversion from 'Template' to 'float', possible loss of data
+          with
+          [
+              Template=int
+          ]
+C:\Users\Desktop\Desktop\LLGP\RayTracerFramework\Low-Level-Games-Programming\RayTracerSmall\UI.h(82,1): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\Desktop\Desktop\LLGP\RayTracerFramework\Low-Level-Games-Programming\RayTracerSmall\SceneManager.cpp(14): message : see reference to function template instantiation 'Template UI::GetUserInput<float>(std::string)' being compiled
+          with
+          [
+              Template=float
+          ]
+  sphere.cpp
 C:\Users\Desktop\Desktop\LLGP\RayTracerFramework\Low-Level-Games-Programming\RayTracerSmall\sphere.cpp(10,36): warning C4305: 'argument': truncation from 'double' to 'Template'
           with
           [
@@ -15,4 +68,17 @@ C:\Users\Desktop\Desktop\LLGP\RayTracerFramework\Low-Level-Games-Programming\Ray
           [
               Template=std::string
           ]
+  Timing.cpp
+  UI.cpp
+C:\Users\Desktop\Desktop\LLGP\RayTracerFramework\Low-Level-Games-Programming\RayTracerSmall\UI.cpp(29,139): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\Desktop\Desktop\LLGP\RayTracerFramework\Low-Level-Games-Programming\RayTracerSmall\UI.cpp(109,49): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+C:\Users\Desktop\Desktop\LLGP\RayTracerFramework\Low-Level-Games-Programming\RayTracerSmall\UI.cpp(132,139): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\Desktop\Desktop\LLGP\RayTracerFramework\Low-Level-Games-Programming\RayTracerSmall\UI.cpp(216,49): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+C:\Users\Desktop\Desktop\LLGP\RayTracerFramework\Low-Level-Games-Programming\RayTracerSmall\UI.h(82,1): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\Desktop\Desktop\LLGP\RayTracerFramework\Low-Level-Games-Programming\RayTracerSmall\UI.cpp(48): message : see reference to function template instantiation 'Template UI::GetUserInput<std::string>(std::string)' being compiled
+          with
+          [
+              Template=std::string
+          ]
+  Generating Code...
   RayTracerSmall.vcxproj -> C:\Users\Desktop\Desktop\LLGP\RayTracerFramework\Low-Level-Games-Programming\x64\Debug\RayTracerSmall.exe
