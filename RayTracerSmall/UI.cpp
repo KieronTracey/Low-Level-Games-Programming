@@ -1,261 +1,184 @@
 #include "UI.h"
 
-UI::UI()
+void UI::DisplayMenu(vector<MenuOption> inputArray, string subTopic)
 {
-}
+	bool exitMenu = false;
+	int pageCount = 1;
+	int menuOption = 0;
 
-UI::~UI()
-{
-}
-
-//--------------------------------------------------//
-//------------ Display functions for UI ------------//
-//--------------------------------------------------//
-
-void UI::DisplayMenu(vector<MenuOption> a_inputArray, string as_subTopic)
-{
-	//- initalising required Var -//
-	bool lb_exitMenuLevel = false;
-	int li_currentPage = 1;
-	int li_menuOptionCount = 0;
-
-	//- Loop till menu is exited -//
-	while (!lb_exitMenuLevel)
+	while (!exitMenu)
 	{
-		//- Display Header With Pg Count
-		PrintHeader(as_subTopic + " Pg: " + to_string(li_currentPage) + "/" + to_string((int)round(a_inputArray.size() / 7) + 1));
+		Header(subTopic + " Page Number: " + to_string(pageCount) + " out of " + to_string((int)round(inputArray.size() / 7) + 1));
 
-		//- Get the amount of outputs That needed to be displayed -//
-		int li_ammountToLoop = ((a_inputArray.size() - ((li_currentPage - 1) * 7)) > 7) ? 7 : (a_inputArray.size() - ((li_currentPage - 1) * 7));
-		//- Calculate the menu offset to get correct elements to read from vector-//
-		li_menuOptionCount = (li_currentPage - 1) * 7;
-		//- Displaying the 7 Dynamic Menu ELements and the 3 Hard Coded Elements -//
-		for (int j = 1; j < li_ammountToLoop + 1; j++)
+		int numToLoop = ((inputArray.size() - ((pageCount - 1) * 7)) > 7) ? 7 : (inputArray.size() - ((pageCount - 1) * 7));
+		menuOption = (pageCount - 1) * 7;
+		for (int i = 1; i < numToLoop + 1; i++)
 		{
-			PrintText("Enter " + to_string(j) + " To: " + a_inputArray[li_menuOptionCount].MenuOutput);
-			li_menuOptionCount++;
+			OutputText("Input " + to_string(i) + " to go to " + inputArray[menuOption].MenuOptOutput);
+			menuOption++;
 		}
 
-		//- Hard Coded values for control functions to make it easier to program -//
-		PrintText("Enter: 8 To: Return To The Previos Page Of Options");
-		PrintText("Enter: 9 To: Go To The Next Page Of Options");
-		PrintText("Enter: 0 To: Exit This Menu");
-		PrintFooter();
+		OutputText("Input 8 to go to the previos page of options");
+		OutputText("Input 9 to go to next page");
+		OutputText("Input 0 to go back");
+		OutputFooter();
 
-		//- Getting the data from function to allow formating -//
-		//- Input is kept as string insted of converting to int to prevent crashes if incorrect option is inputted -//
-		//- when incorrect input is submitted the loop will role over without any issues for another try-//
-		string ls_userInput = (GetUserInput<string>("Please Enter You Selection: "));
+		string userInput = (GetUserInput<string>("Input Selection: "));
 
-		//- Resetting Option Count to loop though elements to check if the conditions match -//
-		li_menuOptionCount = (li_currentPage - 1) * 7;
-		for (int j = 1; j < li_ammountToLoop + 1; j++)
+		menuOption = (pageCount - 1) * 7;
+		for (int x = 1; x < numToLoop + 1; x++)
 		{
-			//- check if the input matched menu element and its a subMenu element -//
-			if (ls_userInput == to_string(j) && a_inputArray[li_menuOptionCount].SubMenuOptions.size() > 0)
+			if (userInput == to_string(x) && inputArray[menuOption].SubMenuOpt.size() > 0)
 			{
-				//- if sub menu is selected the menu is called -//
-				//- This calls its self again and again for menus which isnt the best but there arnt that many menu levels so is controllable-//
-				DisplayMenu(a_inputArray[li_menuOptionCount].SubMenuOptions, a_inputArray[li_menuOptionCount].MenuOutput);
+				DisplayMenu(inputArray[menuOption].SubMenuOpt, inputArray[menuOption].MenuOptOutput);
 				cin.get();
 				cin.get();
 			}
-			//- If the input then matches then function is called through saved void functions -//
-			else if (ls_userInput == to_string(j))
+			else if (userInput == to_string(x))
 			{
-				a_inputArray[li_menuOptionCount].functionToRun();
-				PrintFooter();
+				inputArray[menuOption].functions();
+				OutputFooter();
 				cin.get();
 				cin.get();
 			}
-			//- Keeps optionCount in sync -//
-			li_menuOptionCount++;
+			menuOption++;
 		}
 
-		//- li_toggle is a on off element for the maths as its only on when going down a page -//
-		int li_toggle = 0;
-
-		//- Only need to check first elelemt of the input string as all menu options are 0-9 -//
-		switch (ls_userInput[0])
+		int tog = 0;
+		switch (userInput[0])
 		{
 		case '8':
-			//- Check if move down is possible -//
-			if (li_menuOptionCount > 7)
+			if (menuOption > 7)
 			{
-				//- decriment menu count and togle on the extra maths -//
-				li_menuOptionCount -= 7;
-				li_toggle = 1;
+				menuOption -= 7;
+				tog = 1;
 			}
 			break;
 
 		case '9':
-			//- Check if move up is possible, maths makes it useable for any size -//
-			if (li_menuOptionCount <= ((ceil(a_inputArray.size() / 7) + 1) * 7))
+			if (menuOption <= ((ceil(inputArray.size() / 7) + 1) * 7))
 			{
-				//- increase count and toggle maths off -//
-				li_menuOptionCount += 7;
-				li_toggle = 0;
+				menuOption += 7;
+				tog = 0;
 			}
 			break;
 
 		case '0':
-			//- exit loop to return to next level -//
-			lb_exitMenuLevel = true;
+			exitMenu = true;
 			break;
 		}
 
-
-		//- Altering current page count to be from 1-MAX insted of 0-MAX to prevent maths errors -//
-		li_currentPage = ceil(li_menuOptionCount / 7) + li_toggle;
-		if (li_currentPage == 0) { li_currentPage = 1; }
+		pageCount = ceil(menuOption / 7) + tog;
+		if (pageCount == 0) { pageCount = 1; }
 	}
 }
 
-void UI::DisplayMenu(vector<MenuOption> a_inputArray, string as_subTopic, void(*a_updateFunction)(), int* api_userSelectionRef)
+void UI::DisplayMenu(vector<MenuOption> inputArray, string subTopic, void(*a_updateFunction)(), int* api_userSelectionRef)
 {
-	//--------------------------------------------------------------------------------//
-	//------------ OVERRIDE FUNCTION with call back to Orignal Call Code -------------//
-	//--------------------------------------------------------------------------------//
+	bool exitMenu = false;
+	int currentPg = 1;
+	int menuOptions = 0;
 
-	//- initalising required Var -//
-	bool lb_exitMenuLevel = false;
-	int li_currentPage = 1;
-	int li_menuOptionCount = 0;
-
-	//- Loop till menu is exited -//
-	while (!lb_exitMenuLevel)
+	while (!exitMenu)
 	{
-		//- Display Header With Pg Count
-		PrintHeader(as_subTopic + " Pg: " + to_string(li_currentPage) + "/" + to_string((int)round(a_inputArray.size() / 7) + 1));
+		Header(subTopic + " Page Number " + to_string(currentPg) + " out of " + to_string((int)round(inputArray.size() / 7) + 1));
+		int ammountToLoop = ((inputArray.size() - ((currentPg - 1) * 7)) > 7) ? 7 : (inputArray.size() - ((currentPg - 1) * 7));
+		menuOptions = (currentPg - 1) * 7;
 
-		//- Get the amount of outputs That needed to be displayed -//
-		int li_ammountToLoop = ((a_inputArray.size() - ((li_currentPage - 1) * 7)) > 7) ? 7 : (a_inputArray.size() - ((li_currentPage - 1) * 7));
-		//- Calculate the menu offset to get correct elements to read from vector-//
-		li_menuOptionCount = (li_currentPage - 1) * 7;
-		//- Displaying the 7 Dynamic Menu ELements and the 3 Hard Coded Elements -//
-		for (int j = 1; j < li_ammountToLoop + 1; j++)
+		for (int a = 1; a < ammountToLoop + 1; a++)
 		{
-			PrintText("Enter " + to_string(j) + " To: " + a_inputArray[li_menuOptionCount].MenuOutput);
-			li_menuOptionCount++;
+			OutputText("Input " + to_string(a) + " to go to " + inputArray[menuOptions].MenuOptOutput);
+			menuOptions++;
 		}
 
-		//- Hard Coded values for control functions to make it easier to program -//
-		PrintText("Enter: 8 To: Return To The Previos Page Of Options");
-		PrintText("Enter: 9 To: Go To The Next Page Of Options");
-		PrintText("Enter: 0 To: Exit This Menu");
-		PrintFooter();
+		OutputText("Input 8 to go to the previos page of options");
+		OutputText("Input 9 to go to next page");
+		OutputText("Input 0 to go back");
+		OutputFooter();
 
-		//- Getting the data from function to allow formating -//
-		//- Input is kept as string insted of converting to int to prevent crashes if incorrect option is inputted -//
-		//- when incorrect input is submitted the loop will role over without any issues for another try-//
-		string ls_userInput = (GetUserInput<string>("Please Enter You Selection: "));
+		string userInput = (GetUserInput<string>("Input Selection: "));
 
-		//- Resetting Option Count to loop though elements to check if the conditions match -//
-		li_menuOptionCount = (li_currentPage - 1) * 7;
-		for (int j = 1; j < li_ammountToLoop + 1; j++)
+		menuOptions = (currentPg - 1) * 7;
+		for (int n = 1; n < ammountToLoop + 1; n++)
 		{
-			//- check if the input matched menu element and its a subMenu element -//
-			if (ls_userInput == to_string(j) && a_inputArray[li_menuOptionCount].SubMenuOptions.size() > 0)
+			if (userInput == to_string(n) && inputArray[menuOptions].SubMenuOpt.size() > 0)
 			{
-				//- if sub menu is selected the menu is called -//
-				//- This calls its self again and again for menus which isnt the best but there arnt that many menu levels so is controllable-//
-				DisplayMenu(a_inputArray[li_menuOptionCount].SubMenuOptions, a_inputArray[li_menuOptionCount].MenuOutput);
+				DisplayMenu(inputArray[menuOptions].SubMenuOpt, inputArray[menuOptions].MenuOptOutput);
 				cin.get();
 				cin.get();
 			}
-			//- If the input then matches then function is called through saved void functions -//
-			else if (ls_userInput == to_string(j))
+			else if (userInput == to_string(n))
 			{
-				//----->		//- Changed Element -//
-				*api_userSelectionRef = li_menuOptionCount;
+				*api_userSelectionRef = menuOptions;
 				a_updateFunction();
-				//----->		//- End Of Change -//
-				a_inputArray[li_menuOptionCount].functionToRun();
-				PrintFooter();
+				inputArray[menuOptions].functions();
+				OutputFooter();
 				cin.get();
 				cin.get();
 			}
-			//- Keeps optionCount in sync -//
-			li_menuOptionCount++;
+			menuOptions++;
 		}
+		int toggle = 0;
 
-		//- li_toggle is a on off element for the maths as its only on when going down a page -//
-		int li_toggle = 0;
-
-		//- Only need to check first elelemt of the input string as all menu options are 0-9 -//
-		switch (ls_userInput[0])
+		switch (userInput[0])
 		{
 		case '8':
-			//- Check if move down is possible -//
-			if (li_menuOptionCount > 7)
+			if (menuOptions > 7)
 			{
-				//- decriment menu count and togle on the extra maths -//
-				li_menuOptionCount -= 7;
-				li_toggle = 1;
+				menuOptions -= 7;
+				toggle = 1;
 			}
 			break;
 
 		case '9':
-			//- Check if move up is possible, maths makes it useable for any size -//
-			if (li_menuOptionCount <= ((ceil(a_inputArray.size() / 7) + 1) * 7))
+			if (menuOptions <= ((ceil(inputArray.size() / 7) + 1) * 7))
 			{
-				//- increase count and toggle maths off -//
-				li_menuOptionCount += 7;
-				li_toggle = 0;
+				menuOptions += 7;
+				toggle = 0;
 			}
 			break;
 
 		case '0':
-			//- exit loop to return to next level -//
-			lb_exitMenuLevel = true;
+			exitMenu = true;
 			break;
 		}
 
-
-		//- Altering current page count to be from 1-MAX insted of 0-MAX to prevent maths errors -//
-		li_currentPage = ceil(li_menuOptionCount / 7) + li_toggle;
-		if (li_currentPage == 0) { li_currentPage = 1; }
+		currentPg = ceil(menuOptions / 7) + toggle;
+		if (currentPg == 0) { currentPg = 1; }
 	}
 }
 
-void UI::PrintText(string as_textToCentre)
+void UI::OutputText(string centreText)
 {
-	int li_centreOfText = (int)as_textToCentre.length() / 2;
+	int centreOfText = (int)centreText.length() / 2;
 
-	cout << "| " << std::setw(60 + li_centreOfText) << as_textToCentre << setw(59 - li_centreOfText) << "|\n";
+	cout << setw(60 + centreOfText) << centreText << setw(59 - centreOfText) << "\n";
 }
 
-Vec3f UI::GetUserInputVec3f(string as_inputMessage)
+Vec3f UI::UserInputVec3f(string inputMessage)
 {
-	PrintText(as_inputMessage);
-	Vec3f l_dataInput;
-	cin >> l_dataInput;
-	return l_dataInput;
+	OutputText(inputMessage);
+	Vec3f dataInput;
+	cin >> dataInput;
+	return dataInput;
 }
 
-void UI::PrintHeader(string as_subTopic)
+void UI::Header(string subTopic)
 {
-	clearInterface();
-
-	cout << "|----------------------------------------------------------------------------------------------------------------------|\n";
-	cout << "|                                     Low Level Games Programing Ray Traced Render                                     |\n";
-
-
-	if (as_subTopic != "")
+	CleanInterface();
+	cout << "\n";
+	if (subTopic != "")
 	{
-		cout << "|----------------------------------------------------------------------------------------------------------------------|\n";
-		PrintText(as_subTopic);
+		OutputText(subTopic);
 	}
-
-	cout << "|----------------------------------------------------------------------------------------------------------------------|\n";
 }
 
-void UI::PrintFooter()
+void UI::OutputFooter()
 {
-	cout << "|----------------------------------------------------------------------------------------------------------------------|\n";
+	cout << " \n";
 }
 
-void UI::clearInterface()
+void UI::CleanInterface()
 {
 #if defined _WIN32
 	system("cls");
@@ -264,27 +187,46 @@ void UI::clearInterface()
 #endif
 }
 
-//-------------------------------------------------//
-//------------ User Acsessed Functions ------------//
-//-------------------------------------------------//
-
-//- Void Wrappers -//
-void multiplePagesWrapper() {};
-void subMenuPagesWrapper() {};
-void printTextWrapper() {};
-void displayDataWrapper() {};
-void displayErrorWrapper() {};
-void getUserInputWrapper() {};
-
-//- Member Functions -//
-void UI::SettingsMenu()
+UI::UI()
 {
-	vector<MenuOption> l_menu;
-	l_menu.push_back(MenuOption("UI Test Multiple Pages", multiplePagesWrapper));
-	l_menu.push_back(MenuOption("UI Test Sub Menu", subMenuPagesWrapper));
-	l_menu.push_back(MenuOption("UI Test Print Text", printTextWrapper));
-	l_menu.push_back(MenuOption("UI Test Display Data", displayDataWrapper));
-	l_menu.push_back(MenuOption("UI Test Display Error", displayErrorWrapper));
-	l_menu.push_back(MenuOption("UI Test Get User Input", getUserInputWrapper));
-	DisplayMenu(l_menu, "Settings Menu");
+}
+
+UI::~UI()
+{
+}
+
+
+
+void WWdisplayData()
+{
+
+};
+
+void WWdisplayError()
+{
+
+};
+
+void WWgetUserInput()
+{
+
+};
+
+void WWmultiplePages()
+{
+
+};
+
+void WWsubMenuPages()
+{
+
+};
+
+void WWprintText()
+{
+
+};
+
+void UI::WWSettingsMenu()
+{
 }

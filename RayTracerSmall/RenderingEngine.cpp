@@ -1,296 +1,352 @@
 #include "RenderingEngine.h"
+RenderingEngine* gp_selfRenderer;
 
-RenderingEngine* RendererSelf;
+void TestRenderWrapper() { gp_selfRenderer->TestRender(); };
+void HDRenderWrapper() { gp_selfRenderer->HDRender(); };
 
-void WrapperTestRenderer() { RendererSelf->TestRendering(); };
-
-
-
-void RenderingEngine::MainMenu()
+RenderingEngine::RenderingEngine(SceneManager* ap_sceneManager, UI* ap_UI) : mp_sceneManager(ap_sceneManager), mp_UI(ap_UI), mp_refToSceneElements(nullptr), mp_refToSceneInfo(NULL)
 {
-	vector<MenuOption> Menu;
-
-	Menu.push_back(MenuOption("Render test", WrapperTestRenderer));
-
-	mp_UI->DisplayMenu(Menu, "Rendering engine");
-}
-
-void RenderingEngine::TestRendering()
-{
-	if (sceneManagerP->fileLoaded)
-	{
-		Timing timer;
-		timer.TimerStart();
-		sceneManagerP->sceneRefresh();
-		
-
-		CalculateAmmountOfFramesToRender();
-
-		vector<thread> threadsVec;
-		vector<Vec3f*> framesVec;
-
-		for (int j = 0; j < FrameInfoOutput.size(); j++)
-		{
-			framesVec.push_back(new Vec3f[1920 * 1080]);
-			rendererFunc(FrameInfoOutput[j], j, 1920, 1080, threadsVec, framesVec[j]);
-		}
-
-		for (int v = 0; v < threadsVec.size(); v++)
-		{
-			if (threadsVec[v].joinable())
-			{
-				threadsVec[v].join();
-			}
-		}
-
-		cout << "Successfully renderered " << framesVec.size() << " frames\n";
-
-		for (int n = 0; n < framesVec.size(); n++)
-		{
-			delete framesVec[n];
-			framesVec[n] = nullptr;
-		}
-
-		for (int x = 0; x < FrameInfoOutput.size(); x++)
-		{
-			for (int j = 0; j < FrameInfoOutput[x].size(); j++)
-			{
-				delete FrameInfoOutput[x][j];
-				FrameInfoOutput[x][j] = nullptr;
-			}
-			FrameInfoOutput[x].clear();
-		}
-
-		timer.TimerEnd();
-		timer.TimeTaken();
-		framesVec.clear();
-		FrameInfoOutput.clear();
-		threadsVec.clear();
-		
-	}
-	else
-	{
-		mp_UI->PrintData<string>("No Scene Loaded. Please load a scene and try again again");
-	}
-}
-
-void RenderingEngine::rendererFunc(const std::vector<Sphere*>& spheres, int iteration, unsigned width, unsigned height, vector<thread>& threads, Vec3f* image)
-{
-	Timing Rtimer;
-	Rtimer.TimerStart();
-
-	Vec3f* ipixel = image;
-	float iWidth = 1 / float(width), invHeight = 1 / float(height);
-	float ifov(30), iAR = width / float(height);
-	float iangle = tan(M_PI * 0.5 * ifov / 200.);
-
-	// Trace rays
-	threads.push_back(thread(&RenderingEngine::dataCalculationFunc, this, iteration, width, height, iWidth, invHeight, iangle, ifov, iAR, ipixel, image, spheres));
-
-	Rtimer.TimerEnd();
-	Rtimer.TimeTaken();
-}
-
-float RenderingEngine::mixFunc(const float& temp1, const float& temp2, const float& temp3)
-{
-	return temp2 * temp3 + temp1 * (1 - temp3);
-}
-
-Vec3f RenderingEngine::traceFunc(const Vec3f& rayOrigin, const Vec3f& rayDirection, const vector<Sphere*>& spheres, const int& Depth)
-{
-	float near(INFINITY);
-	const Sphere* sphere(NULL);
-	for (int u = 1; u < spheres.size() + 1; ++u) {
-
-		float tf1(INFINITY);
-		float tf2(INFINITY);
-
-		if (spheres[u]->intersecting(rayOrigin, rayDirection, tf1, tf2))
-		{
-			if (tf1 < 1)
-			{
-				tf1 = tf2; //might be causing bad things
-			}
-
-			if (tf1 < near)
-			{
-				near = tf1;
-				sphere = spheres[u];
-			}
-		}
-	}
-
-	if (!sphere) return Vec3f(0.70, 0.85, 0.89);
-
-	Vec3f IntHit = rayOrigin + rayDirection * near;
-	Vec3f IntitNormal = IntHit - sphere->OBJ_center;
-	Vec3f VecSurfColour(0);
-
-	IntitNormal.normalizeTemplate();
-	float bRay(1e-4);
-
-	bool in = (false);
-
-	if (rayDirection.mathVar(IntitNormal) > 0)
-	{
-		IntitNormal = -IntitNormal, in = true;
-	}
-
-	if ((sphere->OBJ_transparency > 0 || sphere->OBJ_reflection > 0) && Depth < MAX_RAY_DEPTH)
-	{
-		float faceRatio = -rayDirection.mathVar(IntitNormal);
-
-		float freEffect = mixFunc(pow(1 - faceRatio, 3), 1, 0.1);
-
-		Vec3f reflectDirection = rayDirection - IntitNormal * 2 * rayDirection.mathVar(IntitNormal);
-
-		reflectDirection.normalizeTemplate();
-
-		Vec3f reflection = traceFunc(IntHit + IntitNormal * bRay, reflectDirection, spheres, Depth + 1);
-
-		Vec3f Refrac(0);
-
-		if (sphere->OBJ_transparency)
-		{
-			float afg(1.1), gvd = (in) ? afg : 1 / afg;
-			float cos = -IntitNormal.mathVar(rayDirection);
-			float r = 1 - gvd * gvd * (1 - cos * cos);
-			Vec3f reflectDir = rayDirection * gvd + IntitNormal * (gvd * cos - sqrt(r));
-			reflectDir.normalizeTemplate();
-			Refrac = traceFunc(IntHit - IntitNormal * bRay, reflectDir, spheres, Depth + 1);
-		}
-
-		VecSurfColour = (
-			reflection * freEffect +
-			Refrac * (1 - freEffect) * sphere->OBJ_transparency) * sphere->OBJ_surfcolour;
-	}
-	else
-	{
-		for (int i = 1; i < spheres.size() + 1; i++)
-		{
-			if (spheres[i]->OBJ_emisscolour.x > 0)
-			{
-				Vec3f transmis(1);
-				Vec3f lightDir = spheres[i]->OBJ_center - IntHit;
-
-				lightDir.normalizeTemplate();
-
-				for (unsigned p(0); p < spheres.size(); ++p)
-				{
-					if (i != p)
-					{
-						float temp1, temp2;
-
-						if (spheres[p]->intersecting(IntHit + IntitNormal * bRay, lightDir, temp1, temp2)) {
-							transmis = 0;
-							break;
-						}
-					}
-				}
-				VecSurfColour += sphere->OBJ_surfcolour * transmis *
-					max(float(0), IntitNormal.mathVar(lightDir)) * spheres[i]->OBJ_emisscolour;
-			}
-		}
-	}
-
-	return VecSurfColour + sphere->OBJ_emisscolour;
-}
-
-void RenderingEngine::CalculateAmmountOfFramesToRender()
-{
-
-	float frameAmmount = sceneManagerP->sceneLength * sceneManagerP->sceneFPS;
-	int FPS = sceneManagerP->sceneFPS;
-
-	vector<Sphere*> frameTemp;
-
-	for (int g(1); g < frameAmmount+1; ++g)
-	{
-
-		for (int k(0); k < frameTemp.size(); ++k)
-		{
-			frameTemp[k] = nullptr;
-		}
-
-		frameTemp.clear();
-
-		float perc = (g / frameAmmount);
-
-		for (int j(0); j < sceneManagerP->objectsInScene.size(); ++j)
-		{
-			if (sceneManagerP->objectsInScene[j]->OBJ_startpos != sceneManagerP->objectsInScene[j]->OBJ_endpos)
-			{
-				Sphere* temp1 = new Sphere();
-				*temp1 = *sceneManagerP->objectsInScene[j];
-
-				temp1->OBJ_center.x -= (sceneManagerP->objectsInScene[j]->OBJ_startpos.x - sceneManagerP->objectsInScene[j]->OBJ_endpos.x) * perc;
-				temp1->OBJ_center.y -= (sceneManagerP->objectsInScene[j]->OBJ_startpos.y - sceneManagerP->objectsInScene[j]->OBJ_endpos.y) * perc;
-				temp1->OBJ_center.z -= (sceneManagerP->objectsInScene[j]->OBJ_startpos.z - sceneManagerP->objectsInScene[j]->OBJ_endpos.z) * perc;
-
-				frameTemp.push_back(temp1);
-			}
-			else
-			{
-				frameTemp.push_back(sceneManagerP->objectsInScene[j]);
-			}
-		}
-		FrameInfoOutput.push_back(frameTemp);
-	}
-	frameTemp.clear();
-}
-
-void RenderingEngine::dataCalculationFunc(int iteration, int width, int Height, float WidthI, float HeightI, float angle, float fov, float aspectratio, Vec3f* pixel, Vec3f* image1, const vector<Sphere*>& Spheres)
-{
-	for (unsigned y(0); y < Height; ++y)
-	{
-		for (unsigned x(1); x < width+1; ++x, ++pixel)
-		{
-			float x2 = (2 * ((x + 0.5) * WidthI) - 1) * angle * aspectratio;
-			float y2 = (1 - 2 * ((y + 0.5) * HeightI)) * angle;
-
-			Vec3f raydir(x2, y2, -1);
-			raydir.normalizeTemplate();
-			*pixel = traceFunc(Vec3f(0), raydir, Spheres, 0);
-		}
-	}
-
-	stringstream s1;
-	s1 << "./RaytracedImage" << iteration << ".ppm";
-	string tempS = s1.str();
-
-	ofstream OFStream(tempS.c_str(), ios::out | ios::binary);
-	OFStream << "P6\n" << width << " " << Height << "\n255\n";
-	for (unsigned d(0); d < width * Height; ++d) 
-	{
-		OFStream << (unsigned char)(min(float(1), image1[d].x) * 255) << (unsigned char)(min(float(1), image1[d].y) * 255) << (unsigned char)(min(float(1), image1[d].z) * 255);
-	}
-	OFStream.close();
-
-	std::cout << "frame has been rendered \n";
-}
-
-RenderingEngine::RenderingEngine(SceneManager* scenemanager, UI* UI) : sceneManagerP(scenemanager), mp_UI(UI), SceneElementsReference(nullptr), SceneInfoReference(NULL)
-{
-	RendererSelf = this;
+	gp_selfRenderer = this;
 }
 
 RenderingEngine::~RenderingEngine()
 {
-	for (int i = 0; i < FrameInfoOutput.size(); ++i)
+	for (int i = 0; i < mp_calulatedFrameInformation.size(); ++i)
 	{
-		for (int k = 0; k < FrameInfoOutput[i].size(); ++k)
+		for (int j = 0; j < mp_calulatedFrameInformation[i].size(); ++j)
 		{
-			delete FrameInfoOutput[i][k];
-			FrameInfoOutput[i][k] = nullptr;
+			delete mp_calulatedFrameInformation[i][j];
+			mp_calulatedFrameInformation[i][j] = nullptr;
 		}
 	}
 
-	SceneElementsReference = nullptr;
-	SceneInfoReference = nullptr;
+	mp_refToSceneInfo = nullptr;
+	mp_refToSceneElements = nullptr;
+
+	delete mp_sceneManager;
+	mp_sceneManager = nullptr;
 
 	delete mp_UI;
 	mp_UI = nullptr;
-	delete sceneManagerP;
-	sceneManagerP = nullptr;
+}
 
+void RenderingEngine::Menu()
+{
+	vector<MenuOption> l_mainMenu;
+	l_mainMenu.push_back(MenuOption("Test Render", TestRenderWrapper));
+	l_mainMenu.push_back(MenuOption("HD Render", HDRenderWrapper));
+
+
+	mp_UI->DisplayMenu(l_mainMenu, "Rendering Engine");
+}
+
+void RenderingEngine::TestRender()
+{
+	if (mp_sceneManager->loadFile)
+	{
+		mp_sceneManager->SceneRefresh();
+		Timing l_timer;
+		l_timer.TimerStart();
+
+		CalculateFramesToRender();
+
+		std::vector<thread> threads;
+		std::vector<Vec3f*> frames;
+
+		for (int i = 0; i < mp_calulatedFrameInformation.size(); i++)
+		{
+			frames.push_back(new Vec3f[640 * 480]);
+			render(mp_calulatedFrameInformation[i], i, 640, 480, threads, frames[i]);
+		}
+
+		for (int i = 0; i < threads.size(); i++)
+		{
+			if (threads[i].joinable())
+			{
+				threads[i].join();
+			}
+		}
+
+		cout << "Renderered " << frames.size() << " Frames\n";
+
+		for (int i = 0; i < frames.size(); i++)
+		{
+			delete frames[i];
+			frames[i] = nullptr;
+		}
+
+		for (int i = 0; i < mp_calulatedFrameInformation.size(); i++)
+		{
+			for (int j = 0; j < mp_calulatedFrameInformation[i].size(); j++)
+			{
+				delete mp_calulatedFrameInformation[i][j];
+				mp_calulatedFrameInformation[i][j] = nullptr;
+			}
+			mp_calulatedFrameInformation[i].clear();
+		}
+
+		threads.clear();
+		frames.clear();
+		mp_calulatedFrameInformation.clear();
+
+		l_timer.TimerEnd();
+		l_timer.TimeTaken();
+	}
+	else
+	{
+		mp_UI->OutputData<string>("Scene Not Loaded please correct this before trying again");
+	}
+}
+
+void RenderingEngine::HDRender()
+{
+	if (mp_sceneManager->loadFile)
+	{
+		mp_sceneManager->SceneRefresh();
+		Timing l_timer;
+		l_timer.TimerStart();
+
+		CalculateFramesToRender();
+
+		std::vector<thread> threads;
+		std::vector<Vec3f*> frames;
+
+		for (int i = 0; i < mp_calulatedFrameInformation.size(); i++)
+		{
+			frames.push_back(new Vec3f[1920 * 1080]);
+			render(mp_calulatedFrameInformation[i], i, 1920, 1080, threads, frames[i]);
+		}
+
+		for (int i = 0; i < threads.size(); i++)
+		{
+			if (threads[i].joinable())
+			{
+				threads[i].join();
+			}
+		}
+
+		cout << "Renderered " << frames.size() << " Frames\n";
+
+		for (int i = 0; i < frames.size(); i++)
+		{
+			delete frames[i];
+			frames[i] = nullptr;
+		}
+
+		for (int i = 0; i < mp_calulatedFrameInformation.size(); i++)
+		{
+			for (int j = 0; j < mp_calulatedFrameInformation[i].size(); j++)
+			{
+				delete mp_calulatedFrameInformation[i][j];
+				mp_calulatedFrameInformation[i][j] = nullptr;
+			}
+			mp_calulatedFrameInformation[i].clear();
+		}
+
+		threads.clear();
+		frames.clear();
+		mp_calulatedFrameInformation.clear();
+
+		l_timer.TimerEnd();
+		l_timer.TimeTaken();
+	}
+	else
+	{
+		mp_UI->OutputData<string>("Scene Not Loaded please correct this before trying again");
+	}
+}
+
+void RenderingEngine::CalculateFramesToRender()
+{
+	//- Required Var -//
+	//- Creating Duplicate Infomraion to use (so wont alter any saved states) -//
+	float li_totalFrames = mp_sceneManager->Length * mp_sceneManager->FPS;
+	int li_framesPerSecond = mp_sceneManager->FPS;
+
+	//- temp storage -//
+	vector<Sphere*> l_tempSceneFrameStorage;
+
+	//- loops through all frames -//
+	for (int i(0); i < li_totalFrames; ++i)
+	{
+		//- deleting the last frame -//
+		for (int k(0); k < l_tempSceneFrameStorage.size(); ++k)
+		{
+			l_tempSceneFrameStorage[k] = nullptr;
+		}
+		l_tempSceneFrameStorage.clear();
+
+		float lf_lerpPercentage = (i / li_totalFrames);
+
+		//- loop through all elements in the scene -//
+		for (int j(0); j < mp_sceneManager->objectPresent.size(); ++j)
+		{
+			//- Making sure that the element is meant to be animated -//
+			if (mp_sceneManager->objectPresent[j]->OBJ_startpos != mp_sceneManager->objectPresent[j]->OBJ_endpos)
+			{
+				Sphere* temp = new Sphere();
+				*temp = *mp_sceneManager->objectPresent[j];
+
+				//- lerp calculation (li_frameCount is a percentage of travel between the two points) -//           //- Percentage of way through frames for even animation speed -//
+				temp->OBJ_center.x -= (mp_sceneManager->objectPresent[j]->OBJ_startpos.x - mp_sceneManager->objectPresent[j]->OBJ_endpos.x) * lf_lerpPercentage;
+				temp->OBJ_center.y -= (mp_sceneManager->objectPresent[j]->OBJ_startpos.y - mp_sceneManager->objectPresent[j]->OBJ_endpos.y) * lf_lerpPercentage;
+				temp->OBJ_center.z -= (mp_sceneManager->objectPresent[j]->OBJ_startpos.z - mp_sceneManager->objectPresent[j]->OBJ_endpos.z) * lf_lerpPercentage;
+
+				l_tempSceneFrameStorage.push_back(temp);
+			}
+			//- if not animated just push element to the caculatedframeInformation element-//
+			else
+			{
+				l_tempSceneFrameStorage.push_back(mp_sceneManager->objectPresent[j]);
+			}
+		}
+		mp_calulatedFrameInformation.push_back(l_tempSceneFrameStorage);
+	}
+	l_tempSceneFrameStorage.clear();
+}
+
+void RenderingEngine::calculateData(int ai_iteration, int ai_width, int ai_height, float af_invWidth, float af_invHeight, float af_angle, float af_fov, float af_aspectratio, Vec3f* ap_pixel, Vec3f* ap_image, const std::vector<Sphere*>& ar_spheres)
+{
+	for (unsigned y(0); y < ai_height; ++y)
+	{
+		for (unsigned x(0); x < ai_width; ++x, ++ap_pixel)
+		{
+			float xx = (2 * ((x + 0.5) * af_invWidth) - 1) * af_angle * af_aspectratio;
+			float yy = (1 - 2 * ((y + 0.5) * af_invHeight)) * af_angle;
+			Vec3f raydir(xx, yy, -1);
+			raydir.normalizeTemplate();
+			*ap_pixel = trace(Vec3f(0), raydir, ar_spheres, 0);
+		}
+	}
+
+	//Save result to a PPM image (keep these flags if you compile under Windows)
+	std::stringstream ss;
+	ss << "./spheres" << ai_iteration << ".ppm";
+	std::string tempString = ss.str();
+
+	std::ofstream ofs(tempString.c_str(), std::ios::out | std::ios::binary);
+	ofs << "P6\n" << ai_width << " " << ai_height << "\n255\n";
+	for (unsigned i(0); i < ai_width * ai_height; ++i) {
+		ofs << (unsigned char)(std::min(float(1), ap_image[i].x) * 255) <<
+			(unsigned char)(std::min(float(1), ap_image[i].y) * 255) <<
+			(unsigned char)(std::min(float(1), ap_image[i].z) * 255);
+	}
+	ofs.close();
+
+	std::cout << "FRAME RENDERED \n";
+}
+
+//[comment]
+// Main rendering function. We compute a camera ray for each pixel of the image
+// trace it and return a color. If the ray hits a sphere, we return the color of the
+// sphere at the intersection point, else we return the background color.
+//[/comment]
+void RenderingEngine::render(const std::vector<Sphere*>& spheres, int iteration, unsigned width, unsigned height, vector<thread>& ap_threads, Vec3f* ap_image)
+{
+	Timing l_timer;
+	l_timer.TimerStart();
+
+	Vec3f* pixel = ap_image;
+	float invWidth = 1 / float(width), invHeight = 1 / float(height);
+	float fov(30), aspectratio = width / float(height);
+	float angle = tan(M_PI * 0.5 * fov / 180.);
+
+	// Trace rays
+	ap_threads.push_back(std::thread(&RenderingEngine::calculateData, this, iteration, width, height, invWidth, invHeight, angle, fov, aspectratio, pixel, ap_image, spheres));
+
+	l_timer.TimerEnd();
+	l_timer.TimeTaken();
+}
+
+float RenderingEngine::mix(const float& a, const float& b, const float& mix)
+{
+	return b * mix + a * (1 - mix);
+}
+
+//[comment]
+// This is the main trace function. It takes a ray as argument (defined by its origin
+// and direction). We test if this ray intersects any of the geometry in the scene.
+// If the ray intersects an object, we compute the intersection point, the normal
+// at the intersection point, and shade this point using this information.
+// Shading depends on the surface property (is it transparent, reflective, diffuse).
+// The function returns a color for the ray. If the ray intersects an object that
+// is the color of the object at the intersection point, otherwise it returns
+// the background color.
+//[/comment]
+Vec3f RenderingEngine::trace(const Vec3f& rayorig, const Vec3f& raydir, const std::vector<Sphere*>& spheres, const int& depth)
+{
+	float tnear(INFINITY);
+	const Sphere* sphere(NULL);
+	// find intersection of this ray with the sphere in the scene
+	for (int i = 0; i < spheres.size(); ++i) {
+		float t0(INFINITY), t1(INFINITY);
+		if (spheres[i]->intersecting(rayorig, raydir, t0, t1)) {
+			if (t0 < 0) t0 = t1;
+			if (t0 < tnear) {
+				tnear = t0;
+				sphere = spheres[i];
+			}
+		}
+	}
+	// if there's no intersection return black or background color
+	if (!sphere) return Vec3f(0.79, 0.94, 0.98);
+	Vec3f surfaceColor(0); // color of the ray/surfaceof the object intersected by the ray
+	Vec3f phit = rayorig + raydir * tnear; // point of intersection
+	Vec3f nhit = phit - sphere->OBJ_center; // normal at the intersection point
+	nhit.normalizeTemplate(); // normalize normal direction
+					  // If the normal and the view direction are not opposite to each other
+					  // reverse the normal direction. That also means we are inside the sphere so set
+					  // the inside bool to true. Finally reverse the sign of IdotN which we want
+					  // positive.
+	float bias(1e-4); // add some bias to the point from which we will be tracing
+	bool inside(false);
+	if (raydir.mathVar(nhit) > 0) nhit = -nhit, inside = true;
+	if ((sphere->OBJ_transparency > 0 || sphere->OBJ_reflection > 0) && depth < MAX_RAY_DEPTH) {
+		float facingratio = -raydir.mathVar(nhit);
+		// change the mix value to tweak the effect
+		float fresneleffect = mix(pow(1 - facingratio, 3), 1, 0.1);
+		// compute reflection direction (not need to normalize because all vectors
+		// are already normalized)
+		Vec3f refldir = raydir - nhit * 2 * raydir.mathVar(nhit);
+		refldir.normalizeTemplate();
+		Vec3f reflection = trace(phit + nhit * bias, refldir, spheres, depth + 1);
+		Vec3f refraction(0);
+		// if the sphere is also transparent compute refraction ray (transmission)
+		if (sphere->OBJ_transparency) {
+			float ior(1.1), eta = (inside) ? ior : 1 / ior; // are we inside or outside the surface?
+			float cosi = -nhit.mathVar(raydir);
+			float k = 1 - eta * eta * (1 - cosi * cosi);
+			Vec3f refrdir = raydir * eta + nhit * (eta * cosi - sqrt(k));
+			refrdir.normalizeTemplate();
+			refraction = trace(phit - nhit * bias, refrdir, spheres, depth + 1);
+		}
+		// the result is a mix of reflection and refraction (if the sphere is transparent)
+		surfaceColor = (
+			reflection * fresneleffect +
+			refraction * (1 - fresneleffect) * sphere->OBJ_transparency) * sphere->OBJ_surfcolour;
+	}
+	else {
+		// it's a diffuse object, no need to raytrace any further
+		for (int i = 0; i < spheres.size(); i++) {
+			if (spheres[i]->OBJ_emisscolour.x > 0) {
+				// this is a light
+				Vec3f transmission(1);
+				Vec3f lightDirection = spheres[i]->OBJ_center - phit;
+				lightDirection.normalizeTemplate();
+				for (unsigned j(0); j < spheres.size(); ++j) {
+					if (i != j) {
+						float t0, t1;
+						if (spheres[j]->intersecting(phit + nhit * bias, lightDirection, t0, t1)) {
+							transmission = 0;
+							break;
+						}
+					}
+				}
+				surfaceColor += sphere->OBJ_surfcolour * transmission *
+					std::max(float(0), nhit.mathVar(lightDirection)) * spheres[i]->OBJ_emisscolour;
+			}
+		}
+	}
+
+	return surfaceColor + sphere->OBJ_emisscolour;
 }

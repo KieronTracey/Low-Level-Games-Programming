@@ -1,45 +1,50 @@
 #ifndef _RENDERING_ENGINE_H_
 #define _RENDERING_ENGINE_H_
 
+#include <thread>
+
+#include "sphere.h"
 #include "definitions.h"
+#include "SceneManager.h"
 #include "UI.h"
 #include "VecTemplate.h"
 #include "Timing.h"
-#include "sphere.h"
-#include "SceneManager.h"
-#include <thread>
 
-using namespace std;
-
+//- Define for Vec3f Required at start of each header -//
 typedef Vector3<float> Vec3f;
 
 class RenderingEngine
 {
 public:
-    vector<vector<Sphere*>> FrameInfoOutput;
-    vector<Sphere*>* SceneInfoReference;
-    vector<Sphere*>::pointer SceneElementsReference;
 
-    void MainMenu();
-    void TestRendering();
-
-    void CalculateAmmountOfFramesToRender();
-
-    RenderingEngine(SceneManager* SceneManagerReference, UI* ui);
+    //- Manager Methods -//
+    RenderingEngine(SceneManager* ap_sceneManagerRef, UI* ap_UI);
     ~RenderingEngine();
 
-    SceneManager* sceneManagerP;
+
+    //- User Accessed/Defined -//
+    void Menu();
+    void TestRender();
+    void HDRender();
+
+
+    //- Developer Accessed/Defined -//
+    void CalculateFramesToRender();
+
+    vector<vector<Sphere*>> mp_calulatedFrameInformation;
+    vector<Sphere*>* mp_refToSceneInfo;
+    vector<Sphere*>::pointer mp_refToSceneElements;
+    SceneManager* mp_sceneManager;
     UI* mp_UI;
 
 private:
+    void render(const std::vector<Sphere*>& spheres, int iteration, unsigned width, unsigned height, vector<thread>& ap_threads, Vec3f* ap_image);
+    float mix(const float& a, const float& b, const float& mix);
+    Vec3f trace(const Vec3f& rayorig, const Vec3f& raydir, const std::vector<Sphere*>& spheres, const int& depth);
 
-    void rendererFunc(const vector<Sphere*>& OBJ_spheres, int OBJ_iteration, unsigned OBJ_width, unsigned OBJ_height, vector<thread>& numThread, Vec3f* OBJ_image);
+    void calculateData(int ai_iteration, int ai_width, int ai_height, float af_invWidth, float af_invHeight, float af_angle, float af_fov, float af_aspectratio, Vec3f* ap_pixel, Vec3f* ap_image, const std::vector<Sphere*>& ar_spheres);
 
-    float mixFunc(const float& temp1, const float& temp2, const float& mixVar);
-
-    Vec3f traceFunc(const Vec3f& rayOrigin, const Vec3f& rayDirection, const vector<Sphere*>& sphereAmmount, const int& depthOfObj);
-
-    void dataCalculationFunc(int iteration, int width, int height, float WidthInv, float HeightInv, float angle, float fov, float aspectratio, Vec3f* pixel, Vec3f* image, const vector<Sphere*>& spheres);
+    //- Templates -//
 };
 
-#endif
+#endif // !_RENDERING_ENGINE_H_

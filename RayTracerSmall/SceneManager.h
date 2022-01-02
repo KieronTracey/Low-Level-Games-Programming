@@ -2,41 +2,35 @@
 #define _SCENE_MANAGER_H_
 
 #include "Sphere.h"
-using namespace std;
 
 class SceneManager
 {
 public:
-	//- Manager Methods -//
-	SceneManager(UI* ap_uiRef);
+	
+
+	UI* Hui;
+	string SceneName;
+	vector<Sphere*> objectPresent;
+
+	void Menus();
+	void SceneInformation();
+	void LoadSceneFromJson();
+	void SaveSceneToJson();
+	void CreateNewSphereOBJ();
+	void EditSphereOBJ();
+
+	SceneManager(UI* UIRef);
 	~SceneManager();
 
+	vector<Sphere*> FrameToBeRendered(int FPScount);
+	void SceneRefresh();
 
-	//- User Acsessed -//
-	UI* mp_ui;
-	string ms_sceneName;
-	vector<Sphere*> objectsInScene;
-
-	void Menu();
-	void ViewSceneInfo();
-	void LoadScene();
-	void SaveScene();
-	void CreateNewSphere();
-	void EditSpheres();
-
-
-	//- Developer Accsessed -//
-	vector<Sphere*> GetFrameToRender(int frameCount);
-	void sceneRefresh();
-
-	bool fileLoaded;
-	int* mpi_selectedObjectToEdit;
-	Sphere* mp_currentlySelected;
-	float sceneLength;
-	int sceneFPS;
-
-	//- Templates -//
+	bool loadFile;
+	int* selectedObject;
+	Sphere* selectedSphere;
+	float Length;
+	int FPS;
 
 };
 
-#endif // !_SCENE_MANAGER_H_
+#endif

@@ -1,173 +1,198 @@
 #include "SceneManager.h"
 
-SceneManager* gp_selfSceneManager;
+SceneManager* manager;
 
-//------------------------------------------- Void Wrappers for Menu System -----------------------------------//
-//- Function Wrappers For MenuFunction -//
-void ViewSceneInfoWrapper() { gp_selfSceneManager->ViewSceneInfo(); };
-void LoadSceneWrapper() { gp_selfSceneManager->LoadScene(); };
-void SaveSceneWrapper() { gp_selfSceneManager->SaveScene(); };
-void EditSceneWrapper() { gp_selfSceneManager->mp_currentlySelected->UIchange(); };
-void CreateSphereWrapper() { gp_selfSceneManager->CreateNewSphere(); };
-void EditSpheresWrapper() { gp_selfSceneManager->EditSpheres(); };
-void UpdateScelectedObjectWrapper() { gp_selfSceneManager->mp_currentlySelected = gp_selfSceneManager->objectsInScene[*gp_selfSceneManager->mpi_selectedObjectToEdit]; };
-void EditAnimationFPSWrapper() { gp_selfSceneManager->sceneFPS = gp_selfSceneManager->mp_ui->GetUserInput<float>("Enter FPS: "); };
-void EditAnimationDuriationWrapper() { gp_selfSceneManager->sceneLength = gp_selfSceneManager->mp_ui->GetUserInput<int>("Enter Duriation: "); };
-
-SceneManager::SceneManager(UI* ap_uiRef)
+void WWViewSceneInfo()
 {
-	mp_ui = ap_uiRef;
-	ms_sceneName = "Temp Scene Name";
-	gp_selfSceneManager = this;
-	mpi_selectedObjectToEdit = new int();
-	*mpi_selectedObjectToEdit = 0;
-	sceneLength = 1.0f;
-	sceneFPS = 30;
-	fileLoaded = false;
+	manager->SceneInformation(); 
+};
+
+void WWLoadScene() 
+{
+	manager->LoadSceneFromJson(); 
+};
+
+void WWSaveScene() 
+{
+	manager->SaveSceneToJson(); 
+};
+
+void WWEditScene()
+{
+	manager->selectedSphere->UIchange(); 
+};
+
+void WWCreateSphere() 
+{
+	manager->CreateNewSphereOBJ(); 
+};
+
+void WWEditSpheres() 
+{
+	manager->EditSphereOBJ(); 
+};
+
+void WWUpdateScelectedObject() 
+{
+	manager->selectedSphere = manager->objectPresent[*manager->selectedObject]; 
+};
+
+void WWEditAnimationFPS() 
+{
+	manager->FPS = manager->Hui->GetUserInput<float>("Please input FPS: "); 
+};
+
+void WWEditAnimationDuriation() 
+{
+	manager->Length = manager->Hui->GetUserInput<int>("Please input duration: "); 
+};
+
+SceneManager::SceneManager(UI* UIRef)
+{
+	Hui = UIRef;
+	SceneName = "Temp";
+	manager = this;
+	selectedObject = new int();
+	*selectedObject = 0;
+	Length = 1.0f;
+	FPS = 30;
+	loadFile = false;
 }
 
 SceneManager::~SceneManager()
 {
-	delete mpi_selectedObjectToEdit;
-	mpi_selectedObjectToEdit = nullptr;
+	delete selectedObject;
+	selectedObject = nullptr;
 }
 
-vector<Sphere*> SceneManager::GetFrameToRender(int frameCount)
+vector<Sphere*> SceneManager::FrameToBeRendered(int frameCount)
 {
 	return vector<Sphere*>();
 }
 
-void SceneManager::ViewSceneInfo()
+void SceneManager::SceneInformation()
 {
-	mp_ui->PrintHeader("Scene Info");
-	if (objectsInScene.size() == 0)
+	Hui->Header("Current Scene Information");
+	if (objectPresent.size() == 0)
 	{
-		mp_ui->PrintText("No scene loaded please load a scene from the Scene Manager Menu");
+		Hui->OutputText("There is no scene currently loaded");
 	}
 	else
 	{
-		mp_ui->PrintDataWithText("Current Scene Name: ", ms_sceneName);
-		mp_ui->PrintDataWithText("Amount of objects in the scene: ", objectsInScene.size());
+		Hui->OutputDataWithText("Loaded Scene Name: ", SceneName);
+		Hui->OutputDataWithText("objects in scene:: ", objectPresent.size());
 	}
 }
 
-void SceneManager::LoadScene()
+void SceneManager::LoadSceneFromJson()
 {
-	for (int i = 0; i < objectsInScene.size(); i++)
+	for (int i = 0; i < objectPresent.size(); i++)
 	{
-		delete objectsInScene[i];
-		objectsInScene[i] = nullptr;
+		delete objectPresent[i];
+		objectPresent[i] = nullptr;
 	}
-	objectsInScene.clear();
+	objectPresent.clear();
 
-	json l_json;
-	ifstream l_jsonFile;
+	json jsonF;
+	ifstream jsonFileF;
 
 	while (true)
 	{
-		ms_sceneName = mp_ui->GetUserInput<string>("What Scene Do You Want To Load: ");
-		l_jsonFile.open("Scene Saves/" + ms_sceneName + ".json");
+		SceneName = Hui->GetUserInput<string>("please input scene to load  ");
+		jsonFileF.open("Scene Saves/" + SceneName + ".json");
 
-		if (!l_jsonFile.fail())
+		if (!jsonFileF.fail())
 		{
-			l_jsonFile >> l_json;
-			fileLoaded = true;
+			jsonFileF >> jsonF;
+			loadFile = true;
 			break;
 		}
-		mp_ui->PrintData<string>("File could not be found please enter a file name without a file format");
+		Hui->OutputData<string>("No file by that name could be found, please input correct name");
 	}
 
-	sceneFPS = l_json["Animation FPS"];
-	sceneLength = l_json["Animation Duriation"];
+	FPS = jsonF["Animation FPS"];
+	Length = jsonF["Animation Duriation"];
 
-	for (int i = 0; i < l_json["ObjectCount"]; i++)
+	for (int i = 0; i < jsonF["ObjectCount"]; i++)
 	{
-		Sphere* lp_newSphere = new Sphere();
-		lp_newSphere->ConvertJSONtoOBJ(&l_json, i);
-		objectsInScene.push_back(lp_newSphere);
-		lp_newSphere = nullptr;
+		Sphere* newSphere = new Sphere();
+		newSphere->ConvertJSONtoOBJ(&jsonF, i);
+		objectPresent.push_back(newSphere);
+		newSphere = nullptr;
 	}
 
 }
 
-void SceneManager::SaveScene()
+void SceneManager::SaveSceneToJson()
 {
-	mp_ui->PrintHeader("Saving Current Scene, Please enter Name of the save file");
-	ms_sceneName = mp_ui->GetUserInput<string>("Name Of Scene: ");
-	//- Constructing the Scene to Json Format-//
-	json l_json;
-	l_json["ObjectCount"] = objectsInScene.size();
-	l_json["Animation FPS"] = sceneFPS;
-	l_json["Animation Duriation"] = sceneLength;
-	for (int i = 0; i < objectsInScene.size(); i++)
+	Hui->Header("Saving scene, please enter a name for the save");
+	SceneName = Hui->GetUserInput<string>("Scene Name; ");
+	json jsonF;
+	jsonF["ObjectCount"] = objectPresent.size();
+	jsonF["Animation FPS"] = FPS;
+	jsonF["Animation Duriation"] = Length;
+	for (int i = 0; i < objectPresent.size(); i++)
 	{
-		objectsInScene[i]->ConvertOBJtoJSON(&l_json, i);
+		objectPresent[i]->ConvertOBJtoJSON(&jsonF, i);
 	}
-	ofstream l_jsonFile("Scene Saves/" + ms_sceneName + ".json");
-	l_jsonFile << l_json << "\n";
+	ofstream jsonFileF("Scene Saves/" + SceneName + ".json");
+	jsonFileF << jsonF << "\n";
 }
 
-void SceneManager::CreateNewSphere()
+void SceneManager::CreateNewSphereOBJ()
 {
-	Sphere* lp_newSphere = new Sphere();
-	lp_newSphere->UIchange();
-	objectsInScene.push_back(lp_newSphere);
-	lp_newSphere = nullptr;
+	Sphere* newSphere = new Sphere();
+	newSphere->UIchange();
+	objectPresent.push_back(newSphere);
+	newSphere = nullptr;
 
-	SaveScene();
+	SaveSceneToJson();
 }
 
-void SceneManager::EditSpheres()
+void SceneManager::EditSphereOBJ()
 {
-	//- Creating SubMenu Vector -//
-	vector<MenuOption> l_editSceneMenu;
-	//- Create Dynamic Spheres -//
-	for (int i = 0; i < objectsInScene.size(); i++)
+	vector<MenuOption> menueditSceneMenu;
+	for (int a = 0; a < objectPresent.size(); a++)
 	{
-		l_editSceneMenu.push_back(MenuOption(("Edit " + objectsInScene[i]->OBJ_name + " :"), EditSceneWrapper));
+		menueditSceneMenu.push_back(MenuOption(("Edit " + objectPresent[a]->OBJ_name + " :"), WWEditScene));
 	}
 
-	mp_ui->DisplayMenu(l_editSceneMenu, "Edit Scene Elements", UpdateScelectedObjectWrapper, mpi_selectedObjectToEdit);
+	Hui->DisplayMenu(menueditSceneMenu, "Edit Elements", WWUpdateScelectedObject, selectedObject);
 }
 
-void SceneManager::sceneRefresh()
+void SceneManager::SceneRefresh()
 {
-	for (int i = 0; i < objectsInScene.size(); i++)
+	for (int j = 0; j < objectPresent.size(); j++)
 	{
-		delete objectsInScene[i];
-		objectsInScene[i] = nullptr;
+		delete objectPresent[j];
+		objectPresent[j] = nullptr;
 	}
-	objectsInScene.clear();
+	objectPresent.clear();
 
-	json l_json;
-	ifstream l_jsonFile("Scene Saves/" + ms_sceneName + ".json");
-	l_jsonFile >> l_json;
+	json jsonF;
+	ifstream jsonFileF("Scene Saves/" + SceneName + ".json");
+	jsonFileF >> jsonF;
 
-	sceneFPS = l_json["Animation FPS"];
-	sceneLength = l_json["Animation Duriation"];
+	FPS = jsonF["Animation FPS"];
+	Length = jsonF["Animation Duriation"];
 
-	for (int i = 0; i < l_json["ObjectCount"]; i++)
+	for (int n = 0; n < jsonF["ObjectCount"]; n++)
 	{
-		Sphere* lp_newSphere = new Sphere();
-		lp_newSphere->ConvertJSONtoOBJ(&l_json, i);
-		objectsInScene.push_back(lp_newSphere);
-		lp_newSphere = nullptr;
+		Sphere* newSphere = new Sphere();
+		newSphere->ConvertJSONtoOBJ(&jsonF, n);
+		objectPresent.push_back(newSphere);
+		newSphere = nullptr;
 	}
 }
 
-void SceneManager::Menu()
+void SceneManager::Menus()
 {
-	//- Main Menu -//
-	vector<MenuOption> l_menuOptions;
-	l_menuOptions.push_back(MenuOption("View Scene Info", ViewSceneInfoWrapper));
-	l_menuOptions.push_back(MenuOption("Load Scene", LoadSceneWrapper));
-	l_menuOptions.push_back(MenuOption("Save Scene", SaveSceneWrapper));
-	l_menuOptions.push_back(MenuOption("Create New Sphere", CreateSphereWrapper));
-	l_menuOptions.push_back(MenuOption("Edit Scene", EditSpheresWrapper));
-	l_menuOptions.push_back(MenuOption("Change Animations FPS", EditAnimationFPSWrapper));
-	l_menuOptions.push_back(MenuOption("Change Animations Duriation", EditAnimationDuriationWrapper));
-	l_menuOptions.push_back(MenuOption("Duplicate View Scene Info (Here to show ui page functions)", ViewSceneInfoWrapper));
-
-	//- Display Menu -//
-	mp_ui->DisplayMenu(l_menuOptions, "Scene Manager");
+	vector<MenuOption> menuoptions;
+	menuoptions.push_back(MenuOption("View scene information", WWViewSceneInfo));
+	menuoptions.push_back(MenuOption("Load a scene", WWLoadScene));
+	menuoptions.push_back(MenuOption("Save a scene", WWSaveScene));
+	menuoptions.push_back(MenuOption("Edit scene elements", WWEditSpheres));
+	menuoptions.push_back(MenuOption("Change Animations FPS", WWEditAnimationFPS));
+	menuoptions.push_back(MenuOption("Create new sphere", WWCreateSphere));
+	Hui->DisplayMenu(menuoptions, "Scene Manager");
 }

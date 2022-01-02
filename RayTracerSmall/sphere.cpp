@@ -105,14 +105,14 @@ void Sphere::ConvertJSONtoOBJ(json* jsonDt, int jIndex) //comment clearly later 
 
 void Sphere::outputCurrentValues() //comment clearly later too messy
 {
-	spUI->PrintHeader("Current Object Values For " + OBJ_name);
-	spUI->PrintDataWithText("Object's Name: ", OBJ_name);
-	spUI->PrintDataWithText("Position / Center of Object: ", OBJ_center);
-	spUI->PrintDataWithText("Radius of Object: ", OBJ_radius);
-	spUI->PrintDataWithText("Object's Surface Color: ", OBJ_surfcolour);
-	spUI->PrintDataWithText("Object's Emmision Color: ", OBJ_emisscolour);
-	spUI->PrintDataWithText("Object's Transparancy: ", OBJ_transparency);
-	spUI->PrintDataWithText("Object's Reflection: ", OBJ_reflection);
+	spUI->Header("Current Object Values For " + OBJ_name);
+	spUI->OutputDataWithText("Object's Name: ", OBJ_name);
+	spUI->OutputDataWithText("Position / Center of Object: ", OBJ_center);
+	spUI->OutputDataWithText("Radius of Object: ", OBJ_radius);
+	spUI->OutputDataWithText("Object's Surface Color: ", OBJ_surfcolour);
+	spUI->OutputDataWithText("Object's Emmision Color: ", OBJ_emisscolour);
+	spUI->OutputDataWithText("Object's Transparancy: ", OBJ_transparency);
+	spUI->OutputDataWithText("Object's Reflection: ", OBJ_reflection);
 }
 
 void AlterName() 
@@ -132,7 +132,7 @@ void AlterReflection()
 
 void AlterPosition() 
 {
-	OBJ_sSphere->ChangeVar<Vec3f>(OBJ_sSphere->spUI->GetUserInputVec3f("Please Input Position: "), &OBJ_sSphere->OBJ_center); 
+	OBJ_sSphere->ChangeVar<Vec3f>(OBJ_sSphere->spUI->UserInputVec3f("Please Input Position: "), &OBJ_sSphere->OBJ_center); 
 };
 
 void AlterRadius() 
@@ -142,22 +142,22 @@ void AlterRadius()
 
 void AlterSurfaceColor() 
 {
-	OBJ_sSphere->ChangeVar<Vec3f>(OBJ_sSphere->spUI->GetUserInputVec3f("Please Input SurfaceColor: "), &OBJ_sSphere->OBJ_surfcolour); 
+	OBJ_sSphere->ChangeVar<Vec3f>(OBJ_sSphere->spUI->UserInputVec3f("Please Input SurfaceColor: "), &OBJ_sSphere->OBJ_surfcolour); 
 };
 
 void AlterEmissionColor() 
 {
-	OBJ_sSphere->ChangeVar<Vec3f>(OBJ_sSphere->spUI->GetUserInputVec3f("Please Input EmissionColor: "), &OBJ_sSphere->OBJ_emisscolour); 
+	OBJ_sSphere->ChangeVar<Vec3f>(OBJ_sSphere->spUI->UserInputVec3f("Please Input EmissionColor: "), &OBJ_sSphere->OBJ_emisscolour); 
 };
 
 void AlterStartPosition() 
 {
-	OBJ_sSphere->ChangeVar<Vec3f>(OBJ_sSphere->spUI->GetUserInputVec3f("Please Input Start Position: "), &OBJ_sSphere->OBJ_startpos); 
+	OBJ_sSphere->ChangeVar<Vec3f>(OBJ_sSphere->spUI->UserInputVec3f("Please Input Start Position: "), &OBJ_sSphere->OBJ_startpos); 
 };
 
 void AlterEndPosition() 
 {
-	OBJ_sSphere->ChangeVar<Vec3f>(OBJ_sSphere->spUI->GetUserInputVec3f("Please Input End Position: "), &OBJ_sSphere->OBJ_endpos);
+	OBJ_sSphere->ChangeVar<Vec3f>(OBJ_sSphere->spUI->UserInputVec3f("Please Input End Position: "), &OBJ_sSphere->OBJ_endpos);
 };
 
 void DisplayCurrentValues() 
